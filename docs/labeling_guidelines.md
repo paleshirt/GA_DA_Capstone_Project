@@ -1,15 +1,15 @@
 # Labeling Guidelines for Capstone MVP
-## Harvard Thinking vs CNA Deep Dive
+## Hidden Brain vs CNA Deep Dive
 
 ## Purpose
 This project focuses on social commentary / social issues podcast content.
 
 For the MVP, the main task is a **binary classification problem**:
-- **Class 0 = Harvard Thinking**
+- **Class 0 = Hidden Brain**
 - **Class 1 = CNA Deep Dive**
 
 The purpose of this labeling guide is to:
-1. keep the dataset aligned with the project’s social-issues theme
+1. keep the dataset aligned with the project's social-issues theme
 2. define what kinds of episodes should be included
 3. ensure the dataset is clean and consistent before modelling
 
@@ -17,14 +17,15 @@ The purpose of this labeling guide is to:
 
 ## MVP Label Definition
 
-### Class 0: Harvard Thinking
-Assign this label when the episode belongs to **Harvard Thinking**.
+### Class 0: Hidden Brain
+Assign this label when the episode belongs to **Hidden Brain**.
 
 Typical characteristics may include:
-- academic or expert-led discussion
-- research-informed perspective
-- broad social, psychological, political, or cultural themes
-- explanatory or conceptual framing
+- science journalism and evidence-based discussion
+- psychology, neuroscience, and behavioural science lens
+- research-informed perspective on human behaviour and social patterns
+- broad social, psychological, and cultural themes
+- explanatory or conceptual framing backed by academic studies
 
 ### Class 1: CNA Deep Dive
 Assign this label when the episode belongs to **CNA Deep Dive**.
@@ -37,7 +38,7 @@ Typical characteristics may include:
 
 ---
 
-## Thematic Scope: What counts as “social issues / social commentary”
+## Thematic Scope: What counts as "social issues / social commentary"
 Even though the MVP predicts podcast identity, the project should stay within a social-issues theme.
 
 Include episodes that discuss topics such as:
@@ -49,15 +50,16 @@ Include episodes that discuss topics such as:
 - education
 - labour and work
 - climate and environment
-- gender and women’s rights
+- gender and women's rights
 - migration and identity
 - media, misinformation, and public discourse
 - culture and society
+- human behaviour and psychology with social implications
 
 ---
 
 ## Exclude or review carefully
-These types of episodes should be excluded or flagged for review if they do not meaningfully fit the project theme:
+These types of episodes should be excluded or flagged for review:
 - trailers
 - promotional announcements
 - very short filler episodes
@@ -70,7 +72,7 @@ These types of episodes should be excluded or flagged for review if they do not 
 
 ## Inclusion Rules
 Include an episode if:
-1. it clearly belongs to either **Harvard Thinking** or **CNA Deep Dive**
+1. it clearly belongs to either **Hidden Brain** or **CNA Deep Dive**
 2. it has enough usable text (title + description)
 3. it fits the broad project theme of social commentary / social issues
 
@@ -85,27 +87,9 @@ Exclude an episode if:
 
 ---
 
-## Suggested Dataset Fields
-Each row should ideally include:
-- `show_title`
-- `episode_title`
-- `episode_description`
-- `published_date`
-- `text` (combined title + description)
-- `podcast_label`
-- `include_flag`
-- `notes`
-
----
-
 ## Label Values
-Suggested coding:
-- `0` = Harvard Thinking
+- `0` = Hidden Brain
 - `1` = CNA Deep Dive
-
-Suggested inclusion flag:
-- `1` = include
-- `0` = exclude / review
 
 ---
 
