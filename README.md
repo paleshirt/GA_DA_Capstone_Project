@@ -3,7 +3,7 @@
 ## Goal
 Build a performance-first, transparent podcast recommender that helps users discover social commentary / social issues content through Spotify.
 
-The project starts with a simple MVP:
+The project starts with a simple MVP (Minimum Viable Product):
 - compare **2 podcasts only**:
   - **Harvard Thinking**
   - **CNA Deep Dive**
