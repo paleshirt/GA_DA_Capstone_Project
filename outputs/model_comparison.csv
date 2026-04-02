@@ -1,0 +1,10 @@
+,accuracy,f1
+CountVectorizer + NB,0.9873,0.9873
+TF-IDF + NB,0.9873,0.987
+N-grams + NB,0.9873,0.9873
+TF-IDF + LR,0.9873,0.987
+TF-IDF + SVM,0.9747,0.9737
+CountVectorizer + LR,0.9241,0.9167
+CountVectorizer + SVM,0.9241,0.9167
+N-grams + LR,0.9241,0.9167
+N-grams + SVM,0.9241,0.9167
