@@ -1,0 +1,10 @@
+Method,Model,Accuracy,F1
+CountVectorizer,Logistic Regression,0.9241,0.9167
+CountVectorizer,Naive Bayes,0.9873,0.9873
+CountVectorizer,Linear SVM,0.9241,0.9167
+N-grams,Logistic Regression,0.9241,0.9167
+N-grams,Naive Bayes,0.9747,0.975
+N-grams,Linear SVM,0.9241,0.9167
+TF-IDF,Logistic Regression,0.9873,0.987
+TF-IDF,Naive Bayes,0.9873,0.987
+TF-IDF,Linear SVM,0.9747,0.9737
