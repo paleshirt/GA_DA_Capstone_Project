@@ -61,3 +61,12 @@ without needing phrase-level features.
 
 **Locked-in final model:** TF-IDF (unigrams, max_features=5000, min_df=1) + Logistic Regression  
 **Final Accuracy:** 98.73% | **Final F1:** 98.70%
+
+## Round 3 Cleaning: Host Name Completion
+After reviewing the explainability output from `09_explainability.py`, the Hidden Brain 
+host name "shankar" (Shankar Vedantam) appeared as a top predictive feature, indicating 
+residual identity leakage. Added to the cleaning pipeline:
+
+- `shankar`, `vedantam` — Hidden Brain host name
+
+This ensures the model distinguishes podcasts by **content themes**, not host identity.

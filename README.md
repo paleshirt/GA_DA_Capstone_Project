@@ -62,12 +62,10 @@ The first objective is to achieve strong model performance before adding more fe
 - balance to 200 episodes each (400 total)
 - combine into one clean dataset
 
-#### Step 2: Text preprocessing
-- lowercase text
-- remove URLs, punctuation, and unnecessary symbols
-- remove stop words
-- remove duplicate or empty records
-- create fixed 80/20 train/test split
+#### Step 2: Text preprocessing (3 rounds of cleaning)
+- Round 1: Standard NLP — lowercase, remove URLs, special characters, stop words
+- Round 2: Targeted leakage removal — platform boilerplate, host names, podcast identity words
+- Round 3: Residual leakage — host name completion (shankar, vedantam)
 
 #### Step 3: NLP experimentation
 Test **3 vectorisation methods**:

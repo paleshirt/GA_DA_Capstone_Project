@@ -63,6 +63,10 @@ def clean_text(text):
     text = re.sub(r"newshiddenbrainorg\S*", "", text)
     # Remove specific CNA Deep Dive guest/person names (Identity Leakage)
     text = re.sub(r"\b(walter|theseira|lin|suling|kuan|yew)\b", "", text)
+    # Remove CNA Deep Dive host names
+    text = re.sub(r"\b(steven|chia|crispina|robert|tiffany|ang|otelli|edwards)\b", "", text)
+    # Remove Hidden Brain host name
+    text = re.sub(r"\b(shankar|vedantam)\b", "", text)
     return text
 
 df["clean_text"] = df["description"].apply(clean_text)
