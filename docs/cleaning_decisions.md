@@ -51,3 +51,13 @@ After isolating the text to its core thematic content, the models were re-traine
 
 ## Key Takeaway
 By aggressively auditing and cleaning our dataset, we successfully eliminated predictive shortcuts. The TF-IDF vectorizer combined with Logistic Regression or Naive Bayes yields exceptionally high (98.73%) and mathematically sound accuracy, proving the model successfully distinguishes the distinct sociological and psychological themes of the two podcasts.
+
+## Optimization Finding
+During hyperparameter tuning of TF-IDF + Logistic Regression, the simplest 
+configuration (unigrams, max_features=5000, min_df=1) outperformed more complex 
+configurations with bigrams and trigrams. This suggests the episode descriptions 
+contain sufficiently distinctive unigram vocabulary to separate the two podcasts 
+without needing phrase-level features.
+
+**Locked-in final model:** TF-IDF (unigrams, max_features=5000, min_df=1) + Logistic Regression  
+**Final Accuracy:** 98.73% | **Final F1:** 98.70%

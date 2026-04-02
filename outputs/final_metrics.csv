@@ -1,0 +1,2 @@
+model,accuracy,f1,vectorizer,max_features,ngram_range,min_df
+TF-IDF + Logistic Regression,0.9873417721518988,0.987012987012987,TF-IDF,5000,"(1,1)",1
