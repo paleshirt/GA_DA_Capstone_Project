@@ -49,7 +49,7 @@ def clean_text(text):
     # Remove stop words
     text = " ".join([w for w in text.split() if w not in stop_words])
     # Remove podcast name references
-    text = re.sub(r"\b(hidden brain|hidden|brain|podcast|episode|week|series|favorite)\b", "", text)
+    text = re.sub(r"\b(hidden|brain|podcast|episode|episodes|week|series|favorite)\b", "", text)
     # Remove CNA identity words
     text = re.sub(r"\b(singapore|deep dive|cna)\b", "", text)
     # Remove generic guest titles and common filler words

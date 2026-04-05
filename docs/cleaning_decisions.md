@@ -70,3 +70,34 @@ residual identity leakage. Added to the cleaning pipeline:
 - `shankar`, `vedantam` — Hidden Brain host name
 
 This ensures the model distinguishes podcasts by **content themes**, not host identity.
+
+## Known Limitations of the Recommender
+
+### Vocabulary Mismatch Problem
+The episode recommender relies on keyword overlap and cosine similarity between 
+the user's input and episode descriptions. This works well when the user's 
+vocabulary matches the podcast's vocabulary. However, mismatches occur when:
+
+- The user uses **clinical/formal terms** (e.g. "burnout", "housing") but the 
+  podcast uses **different vocabulary** for the same topic (e.g. "worker 
+  wellbeing", "property market", "HDB flats")
+- The dataset is **limited to 196 CNA Deep Dive episodes** — niche topics may 
+  have few or no matching episodes
+
+### Affected Test Cases
+- Test 2: "Singapore housing policy" → recommended nightlife episode (off-topic)
+- Test 5: "workplace stress burnout" → recommended Joseph Schooling cannabis 
+  episode (off-topic)
+
+### Potential Future Fixes
+1. **Synonym expansion** — map user input words to related terms before scoring
+   (e.g. "burnout" → also search for "stress", "wellbeing", "overwork")
+2. **Larger dataset** — pulling more episodes per podcast would improve coverage
+3. **Full transcript data** — episode descriptions are short; full transcripts 
+   would give much richer text signal
+4. **Semantic similarity** — use sentence transformers (e.g. SBERT) instead of 
+   TF-IDF for meaning-based rather than keyword-based matching
+5. **Episode title boosting** — already partially implemented in v2 but could 
+   be weighted higher for short inputs
+
+These improvements are noted as stretch goals beyond the current MVP scope.
