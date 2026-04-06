@@ -6,6 +6,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from sklearn.metrics.pairwise import cosine_similarity
+import os
+from dotenv import load_dotenv
+
+# Load credentials — works both locally (.env) and on Streamlit Cloud (secrets.toml)
+try:
+    SPOTIFY_CLIENT_ID     = st.secrets["SPOTIFY_CLIENT_ID"]
+    SPOTIFY_CLIENT_SECRET = st.secrets["SPOTIFY_CLIENT_SECRET"]
+except Exception:
+    load_dotenv()
+    SPOTIFY_CLIENT_ID     = os.getenv("SPOTIFY_CLIENT_ID")
+    SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 # ── Page config ────────────────────────────────────────────────────────────
 st.set_page_config(
