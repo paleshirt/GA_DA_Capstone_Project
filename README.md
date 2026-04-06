@@ -182,3 +182,20 @@ Then open `http://localhost:8501` in your browser.
 ---
 
 ## Repo Structure
+data_raw/               → raw extracted data (episodes_raw.csv)
+data_clean/             → cleaned data (episodes_clean.csv, train.csv, test.csv)
+notebooks/              → 12 Python scripts covering full pipeline
+outputs/figures/        → confusion matrices, feature importance plots
+outputs/models/         → tfidf_vectorizer.pkl, logistic_regression_model.pkl
+outputs/                → model comparison, final metrics, Tableau export CSVs
+docs/                   → labeling_guidelines.md, cleaning_decisions.md
+app.py                  → Streamlit web application
+requirements.txt        → Python dependencies
+
+---
+
+## How to Reproduce
+
+1. Clone the repo
+2. Install dependencies: `pip install -r requirements.txt`
+3. Add your Spotify credentials to a `.env` file:
