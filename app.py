@@ -456,24 +456,29 @@ with tab3:
     st.markdown("### 📊 Full Interactive Dashboard")
     st.markdown("Built with Tableau — scroll to explore the full data story.")
 
-    # Tableau Public official embed code (matches what Tableau generates)
-    tableau_embed = """
-    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative'>
+    # ── Tableau dashboard embed ────────────────────────────────────────────
+    st.markdown("### 📊 Full Interactive Dashboard")
+    st.markdown(
+        "Explore the full data story below — from the growth of podcast content "
+        "to the distinct identities of each show. Built with Tableau."
+    )
+
+    # Using the raw Tableau JS API embed code for a more stable render
+    # Forced 'device' to 'desktop' to prevent mobile layout breakage
+    html_code = """
+    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative; width: 100%; height: 2027px;'>
         <noscript>
-            <a href='#'>
-                <img alt='Social Issues Podcast Recommender'
-                    src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png'
-                    style='border: none' />
-            </a>
+            <a href='#'><img alt='Social Issues Podcast Recommender ' src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png' style='border: none' /></a>
         </noscript>
         <object class='tableauViz' style='display:none;'>
-            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-            <param name='embed_code_version' value='3' />
+            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+            <param name='embed_code_version' value='3' /> 
             <param name='site_root' value='' />
             <param name='name' value='GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft' />
             <param name='tabs' value='no' />
-            <param name='toolbar' value='yes' />
-            <param name='static_image' value='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1.png' />
+            <param name='toolbar' value='no' />
+            <param name='device' value='desktop' />
+            <param name='static_image' value='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1.png' /> 
             <param name='animate_transition' value='yes' />
             <param name='display_static_image' value='yes' />
             <param name='display_spinner' value='yes' />
@@ -485,20 +490,13 @@ with tab3:
     </div>
     <script type='text/javascript'>
         var divElement = document.getElementById('viz1775658569626');
-        var vizElement = divElement.getElementsByTagName('object')[0];
-        if (divElement.offsetWidth > 800) {
-            vizElement.style.width = '1200px';
-            vizElement.style.height = '2027px';
-        } else if (divElement.offsetWidth > 500) {
-            vizElement.style.width = '1200px';
-            vizElement.style.height = '2027px';
-        } else {
-            vizElement.style.width = '100%';
-            vizElement.style.height = '2727px';
-        }
+        var vizElement = divElement.getElementsByTagName('object');
+        vizElement.style.width='100%';
+        vizElement.style.height='2027px';
         var scriptElement = document.createElement('script');
         scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
         vizElement.parentNode.insertBefore(scriptElement, vizElement);
     </script>
     """
-    components.html(tableau_embed, height=2150, scrolling=True)
+    
+    components.html(html_code, height=2050, scrolling=True)
