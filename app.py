@@ -41,178 +41,464 @@ def load_data():
     clean_df = pd.read_csv("data_clean/episodes_clean.csv")
     return raw_df, clean_df
 
-tfidf, model = load_model()
+tfidf, model     = load_model()
 raw_df, clean_df = load_data()
+feature_names    = tfidf.get_feature_names_out()
+coefficients     = model.coef_[0]
+stop_words       = set(ENGLISH_STOP_WORDS)
 
-# ── Navigation ─────────────────────────────────────────────────────────────
-tab1, tab2, tab3 = st.tabs(["🔍 Find My Podcast", "📖 About the Podcasts", "📊 Data Insights"])
+# ── Synonym expansion map ──────────────────────────────────────────────────
+SYNONYM_MAP = {
+    "stress":        ["work", "pressure", "mental", "health", "emotion"],
+    "burnout":       ["work", "pressure", "mental", "health"],
+    "anxiety":       ["mental", "health", "fear", "psychological"],
+    "depression":    ["mental", "health", "psychological", "mood", "emotion"],
+    "bias":          ["unconscious", "psychological", "behavior", "decision"],
+    "irrational":    ["behavior", "decision", "psychological", "emotion"],
+    "housing":       ["public", "policy", "government", "national", "social"],
+    "hdb":           ["public", "policy", "government", "national"],
+    "cost":          ["public", "policy", "social", "national"],
+    "jobs":          ["workers", "business", "national", "social", "policy"],
+    "inequality":    ["social", "policy", "public", "national", "workers"],
+    "racism":        ["social", "policy", "bias", "psychological", "behavior"],
+    "climate":       ["environment", "policy", "national", "public", "social"],
+    "relationships": ["conversation", "people", "psychological", "lives"],
+    "happiness":     ["psychological", "people", "lives", "purpose", "emotion"],
+    "leadership":    ["psychological", "people", "work", "behavior", "decision"],
+    "mental":        ["psychological", "health", "emotion", "people", "lives"],
+    "fear":          ["psychological", "emotion", "behavior", "people"],
+    "grief":         ["psychological", "emotion", "lives", "people"],
+    "identity":      ["psychological", "social", "people", "behavior"],
+    "education":     ["school", "national", "public", "policy", "social"],
+    "poverty":       ["social", "policy", "public", "national", "workers"],
+}
 
-# ── TAB 1: RECOMMENDER ─────────────────────────────────────────────────────
+def expand_input(text):
+    words = text.lower().split()
+    expansions = []
+    for word in words:
+        if word in SYNONYM_MAP:
+            expansions.extend(SYNONYM_MAP[word])
+    if expansions:
+        return text + " " + " ".join(expansions)
+    return text
+
+# ── Text cleaning ──────────────────────────────────────────────────────────
+def clean_input(text):
+    text = text.lower()
+    text = re.sub(r"http\S+|www\S+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    text = " ".join([w for w in text.split() if w not in stop_words])
+    return text
+
+# ── Spotify episode ID extractor ───────────────────────────────────────────
+def get_spotify_episode_id(url):
+    match = re.search(r"episode/([a-zA-Z0-9]+)", url)
+    return match.group(1) if match else None
+
+# ── Podcast info ────────────────────────────────────────────────────────────
+PODCAST_INFO = {
+    "Hidden Brain": {
+        "host": "Shankar Vedantam",
+        "style": "Academic · Psychology · Human Behaviour",
+        "description": (
+            "Hidden Brain explores the unconscious patterns that drive human behaviour. "
+            "Hosted by science journalist Shankar Vedantam, each episode draws on research "
+            "from psychology, neuroscience, and social science to explain why we think and "
+            "act the way we do."
+        ),
+        "spotify_show_id": "20Gf4IAauFrfj7RBkjcWxh",
+        "spotify_show":    "https://open.spotify.com/show/20Gf4IAauFrfj7RBkjcWxh",
+        "color": "🟠",
+        "identity": "psychology and human behaviour",
+        "lens": "It explores the psychological and behavioural science behind this topic.",
+        "best_for": [
+            "Why people make irrational decisions",
+            "The psychology of relationships and emotions",
+            "Unconscious bias and behaviour",
+            "Motivation, happiness, and purpose",
+            "Social patterns and human connection",
+        ],
+    },
+    "CNA Deep Dive": {
+        "host": "Steven Chia & Tiffany Ang",
+        "style": "Newsroom · Public Policy · Singapore & Asia",
+        "description": (
+            "CNA Deep Dive unpacks Singapore's most pressing social, economic, and political "
+            "issues. Hosted by Steven Chia and Tiffany Ang, each episode brings in expert "
+            "guests to explain the context behind the headlines — from housing policy to "
+            "mental health legislation."
+        ),
+        "spotify_show_id": "2hcojizvVOLz8dTRblRuSC",
+        "spotify_show":    "https://open.spotify.com/show/2hcojizvVOLz8dTRblRuSC",
+        "color": "🔵",
+        "identity": "Singapore social issues and public policy",
+        "lens": "It examines this topic through a Singapore and public policy lens.",
+        "best_for": [
+            "Singapore housing and cost of living",
+            "Government policy and public services",
+            "Mental health in Singapore society",
+            "Climate change and sustainability",
+            "Education, workforce, and social inequality",
+        ],
+    },
+}
+
+# ── Recommendation logic ───────────────────────────────────────────────────
+def recommend(user_input, n=2):
+    expanded   = expand_input(user_input)
+    cleaned    = clean_input(expanded)
+    user_vec   = tfidf.transform([cleaned])
+
+    pred_label   = model.predict(user_vec)[0]
+    pred_proba   = model.predict_proba(user_vec)[0]
+    confidence   = round(max(pred_proba) * 100, 1)
+    podcast_name = "Hidden Brain" if pred_label == 0 else "CNA Deep Dive"
+
+    feature_list = list(feature_names)
+    coef_sign    = coefficients if pred_label == 1 else -coefficients
+    input_words  = cleaned.split()
+    word_scores  = {
+        w: coef_sign[feature_list.index(w)]
+        for w in input_words if w in feature_list
+    }
+    top_keywords = sorted(word_scores, key=word_scores.get, reverse=True)[:5]
+    theme_str    = ", ".join(top_keywords) if top_keywords else "social issues"
+
+    matched_clean = clean_df[clean_df["label"] == pred_label].copy()
+    matched_raw   = raw_df[raw_df["podcast"] == podcast_name].copy()
+    matched_raw   = matched_raw[
+        matched_raw["title"].isin(matched_clean["title"])
+    ].copy()
+    matched_clean = matched_clean.reset_index(drop=True)
+    matched_raw   = matched_raw.reset_index(drop=True)
+
+    ep_vecs    = tfidf.transform(matched_clean["clean_text"].fillna(""))
+    cos_scores = cosine_similarity(user_vec, ep_vecs)[0]
+
+    def keyword_overlap(ep_text, keywords):
+        if not keywords:
+            return 0
+        ep_words = set(str(ep_text).lower().split())
+        return sum(1 for kw in keywords if kw in ep_words) / len(keywords)
+
+    overlap_scores = matched_clean["clean_text"].apply(
+        lambda x: keyword_overlap(x, input_words)).values
+    title_scores   = matched_raw["title"].apply(
+        lambda x: keyword_overlap(str(x).lower(), input_words)).values
+
+    combined_scores = 0.6 * cos_scores + 0.2 * overlap_scores + 0.2 * title_scores
+    matched_clean["score"] = combined_scores
+
+    top_idx      = matched_clean.nlargest(n, "score").index.tolist()
+    top_episodes = matched_raw.loc[top_idx]
+
+    return podcast_name, confidence, theme_str, top_keywords, top_episodes, matched_clean, top_idx
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# HEADER
+# ══════════════════════════════════════════════════════════════════════════
+st.title("🎙️ Better Questions")
+st.markdown("### *Find your next social issues podcast — with transparent recommendations*")
+st.markdown(
+    "**High-quality mental health and social resources are often gated by financial barriers, "
+    "making free podcasts a vital stepping stone for self-discovery and healing.** "
+    "Type what you want to learn about — our engine scans the actual conversations and themes "
+    "of hundreds of episodes on Spotify to find your best match, and explains exactly why."
+)
+st.markdown("---")
+
+tab1, tab2, tab3 = st.tabs(["🔍 Find My Podcast", "🎧 About the Podcasts", "📊 Data Insights"])
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# TAB 1: RECOMMENDER
+# ══════════════════════════════════════════════════════════════════════════
 with tab1:
-    st.title("🎙️ Better Questions")
-    st.markdown("""
-    ### Find your next stepping stone for self-healing.
-    *Type a topic or feeling below. Our engine scans the actual conversations and themes of hundreds of episodes 
-    to find your best match, rather than just relying on broad category tags.*
-    """)
-    st.write("---")
-
-    # Using st.form ensures that pressing "Enter" triggers the submit button natively on all OS
-    with st.form(key="search_form"):
-        user_input = st.text_input(
-            "What would you like to explore today?",
-            placeholder="e.g., How to manage anxiety, or social inequality in Singapore..."
-        )
-        submit_button = st.form_submit_button("🔍 Find My Podcast")
-
-    # Example inputs outside the form
-    st.markdown("**Or try an example:**")
-    col_ex1, col_ex2, col_ex3 = st.columns(3)
-    with col_ex1: ex1 = st.button("💡 I feel like I'm falling behind my peers", use_container_width=True)
-    with col_ex2: ex2 = st.button("💡 Why is housing so expensive now?", use_container_width=True)
-    with col_ex3: ex3 = st.button("💡 I want to communicate better in relationships", use_container_width=True)
-
-    # Determine which query to run
-    active_query = ""
-    if submit_button and user_input.strip():
-        active_query = user_input
-    elif ex1: active_query = "I feel like I'm falling behind my peers"
-    elif ex2: active_query = "Why is housing so expensive now?"
-    elif ex3: active_query = "I want to communicate better in relationships"
-    elif submit_button and not user_input.strip():
-        st.warning("Please enter a topic to get a recommendation!")
-
-    if active_query:
-        st.markdown(f"**Searching for:** *{active_query}*")
-        st.write("---")
-        
-        # 1. Vectorize input
-        input_vec = tfidf.transform([active_query])
-        
-        # 2. Predict podcast
-        pred_idx = model.predict(input_vec)
-        podcasts = model.classes_
-        final_podcast = podcasts[pred_idx]
-        
-        # 3. Find top keywords driving the decision
-        feature_names = tfidf.get_feature_names_out()
-        coefs = model.coef_
-        if final_podcast == podcasts:
-            coefs = -coefs
-            
-        nonzero_idx = input_vec.nonzero()
-        word_scores = [(feature_names[i], coefs[i]) for i in nonzero_idx]
-        word_scores.sort(key=lambda x: x, reverse=True)
-        top_words = [w for w in word_scores[:3] if w > 0]
-        
-        # --- UI OUTPUT ---
-        st.subheader("🎯 Your Recommendation:")
-        st.header(final_podcast)
-
-        if top_words:
-            badges = " ".join([f"<span style='background-color:#d1fae5; color:#065f46; padding:4px 8px; border-radius:12px; font-size:14px; margin-right:5px;'>{word}</span>" for word in top_words])
-            st.markdown(f"**Key themes detected:** {badges}", unsafe_allow_html=True)
-            st.write("") # spacing
-
-        # Spotify Embed
-        st.markdown("##### 🎧 Listen to the Show on Spotify")
-        if final_podcast == "Hidden Brain":
-            spotify_url = "https://open.spotify.com/embed/show/20AdxCWTik21B3s27K2s8Z"
-        else:
-            spotify_url = "https://open.spotify.com/embed/show/7BvA1Kq2uV82y3Vtc3jGjQ"
-            
-        components.html(
-            f'<iframe style="border-radius:12px" src="{spotify_url}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
-            height=160
-        )
-
-# ── TAB 2: ABOUT THE PODCASTS ──────────────────────────────────────────────
-with tab2:
-    st.title("📖 Podcast Context")
-    st.write("Learn more about the distinct personalities of our two featured shows.")
-    st.write("---")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.header("CNA Deep Dive")
-        st.write("""
-        **Host:** Steven Chia & Tiffany Ang  
-        **Focus:** Current affairs, public policy, and societal trends in Singapore and Asia.
-        
-        **Why this matters:** CNA Deep Dive tackles the structural side of the human experience. 
-        It focuses on the 'how' and 'why' of the world around us, looking at policy, economics, 
-        and national conversations. It's the perfect resource for understanding societal context.
-        """)
-        components.html(
-            '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/show/7BvA1Kq2uV82y3Vtc3jGjQ" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
-            height=160
-        )
-        
-    with col2:
-        st.header("Hidden Brain")
-        st.write("""
-        **Host:** Shankar Vedantam  
-        **Focus:** Psychology, human behavior, and the unconscious patterns that drive us.
-        
-        **Why this matters:** Hidden Brain tackles the personal side of the human experience. 
-        It explores the inner workings of the mind, helping listeners reflect on their own habits, 
-        emotions, and relationships. It is a powerful tool for self-understanding and healing.
-        """)
-        components.html(
-            '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/show/20AdxCWTik21B3s27K2s8Z" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
-            height=160
-        )
-
-# ── TAB 3: DATA INSIGHTS ───────────────────────────────────────────────────
-with tab3:
-    st.title("⚙️ Model Engine & Analytics")
-    st.info(
-        "This section is for those curious about how the recommendation engine works. "
-        "It details the model performance and the data story behind the scenes."
-    )
-    
-    st.markdown("### 🏆 How Accurate is the Recommender?")
+    st.subheader("What topics are you interested in?")
     st.markdown(
-        "To find the most reliable approach, 9 different combinations of text analysis methods "
-        "and classifiers were tested. Every single one exceeded the 90% accuracy target."
+        "Describe a topic, a feeling, or a question you have. "
+        "The recommender will match you to the podcast whose vocabulary "
+        "most closely mirrors your interests — and show you exactly which words drove that choice."
+    )
+    st.caption("💡 **Mac:** ⌘ + Enter to search &nbsp;|&nbsp; **Windows:** Ctrl + Enter to search")
+
+    # st.form enables Enter key (⌘+Enter / Ctrl+Enter) to submit
+    with st.form(key="search_form", clear_on_submit=False):
+        user_input = st.text_area(
+            "Your interests:",
+            placeholder="e.g. why do people make irrational decisions... or Singapore housing policy...",
+            height=100,
+        )
+        submitted = st.form_submit_button("🎯 Find My Podcast", type="primary")
+
+    if submitted:
+        if user_input.strip():
+            with st.spinner("Matching your interests..."):
+                podcast_name, confidence, theme_str, top_keywords, top_episodes, matched_clean, top_idx = recommend(user_input)
+
+            info = PODCAST_INFO[podcast_name]
+            st.markdown("---")
+
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                st.markdown(f"## {info['color']} Matched to: **{podcast_name}**")
+                st.markdown(f"*{info['style']}* · Hosted by {info['host']}")
+            with col2:
+                st.metric(
+                    "Match Confidence", f"{confidence}%",
+                    help="How confident the model is that this podcast matches your interests"
+                )
+
+            st.info(
+                f"💡 **Why this podcast?** Your input contained themes related to "
+                f"**{theme_str}** — words strongly associated with *{podcast_name}*'s "
+                f"focus on {info['identity']}."
+            )
+
+            if top_keywords:
+                st.markdown("**🔑 Key phrases detected in your input:**")
+                cols = st.columns(len(top_keywords))
+                for i, kw in enumerate(top_keywords):
+                    cols[i].success(f"**{kw}**")
+
+            st.markdown("---")
+            st.subheader("🎧 Top 2 Episodes to Listen To")
+
+            for rank, (idx, row) in enumerate(top_episodes.iterrows(), 1):
+                score      = matched_clean.loc[top_idx[rank - 1], "score"]
+                episode_id = get_spotify_episode_id(row["spotify_url"])
+
+                with st.expander(
+                    f"**#{rank}: {row['title']}** — {round(score * 100, 1)}% match",
+                    expanded=True
+                ):
+                    st.markdown(f"**📅 Released:** {row['release_date']}")
+                    st.markdown(
+                        f"**🔍 Why this episode?** This episode from *{podcast_name}* "
+                        f"closely matches your interest in **{theme_str}**. "
+                        f"{info['lens']}"
+                    )
+                    if episode_id:
+                        components.html(
+                            f"""<iframe style="border-radius:12px"
+                                src="https://open.spotify.com/embed/episode/{episode_id}?utm_source=generator"
+                                width="100%" height="152" frameBorder="0" allowfullscreen=""
+                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                loading="lazy"></iframe>""",
+                            height=160
+                        )
+                    else:
+                        st.markdown(f"[🎵 Listen on Spotify]({row['spotify_url']})")
+        else:
+            st.warning("Please describe what you're interested in!")
+
+    st.markdown("---")
+    st.markdown("### 💡 Not sure what to type? Try these examples:")
+    col1, col2 = st.columns(2)
+    examples = {
+        "🟠 Hidden Brain": [
+            "the psychology behind why people avoid making decisions",
+            "unconscious bias and how it shapes human behavior",
+            "the science of happiness and what truly motivates people",
+        ],
+        "🔵 CNA Deep Dive": [
+            "government policy on housing and cost of living in Singapore",
+            "mental health support and social services for young people",
+            "Singapore's approach to climate change and sustainability",
+        ],
+    }
+    for col, (podcast, phrases) in zip([col1, col2], examples.items()):
+        with col:
+            st.markdown(f"**{podcast}**")
+            for phrase in phrases:
+                st.markdown(f"- *{phrase}*")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# TAB 2: ABOUT THE PODCASTS
+# ══════════════════════════════════════════════════════════════════════════
+with tab2:
+    st.subheader("About the Podcasts")
+    st.markdown(
+        "This recommender covers two expert-led social issues podcasts. "
+        "Both explore themes that matter to society — but from very different angles."
     )
 
+    col1, col2 = st.columns(2)
+
+    with col1:
+        info = PODCAST_INFO["Hidden Brain"]
+        st.markdown(f"### {info['color']} Hidden Brain")
+        st.markdown(f"**Host:** {info['host']}")
+        st.markdown(f"**Style:** {info['style']}")
+        st.markdown(info["description"])
+        st.markdown("**Best for topics like:**")
+        for topic in info["best_for"]:
+            st.markdown(f"- {topic}")
+        components.html(
+            """<iframe style="border-radius:12px"
+                src="https://open.spotify.com/embed/show/20Gf4IAauFrfj7RBkjcWxh?utm_source=generator"
+                width="100%" height="152" frameBorder="0" allowfullscreen=""
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"></iframe>""",
+            height=160
+        )
+
+    with col2:
+        info = PODCAST_INFO["CNA Deep Dive"]
+        st.markdown(f"### {info['color']} CNA Deep Dive")
+        st.markdown(f"**Host:** {info['host']}")
+        st.markdown(f"**Style:** {info['style']}")
+        st.markdown(info["description"])
+        st.markdown("**Best for topics like:**")
+        for topic in info["best_for"]:
+            st.markdown(f"- {topic}")
+        components.html(
+            """<iframe style="border-radius:12px"
+                src="https://open.spotify.com/embed/show/2hcojizvVOLz8dTRblRuSC?utm_source=generator"
+                width="100%" height="152" frameBorder="0" allowfullscreen=""
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"></iframe>""",
+            height=160
+        )
+
+    st.markdown("---")
+    st.markdown("### 🔬 What separates them?")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(
+            "**Hidden Brain** approaches social issues from the **inside out** — "
+            "starting with individual psychology and working outward to explain collective behaviour. "
+            "Episodes are topic-focused and timeless."
+        )
+    with col2:
+        st.markdown(
+            "**CNA Deep Dive** approaches social issues from the **outside in** — "
+            "starting with current events, policy, and institutions and examining their impact on people. "
+            "Episodes are timely, objective, and Singapore-focused."
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# TAB 3: DATA INSIGHTS
+# ══════════════════════════════════════════════════════════════════════════
+with tab3:
+    st.subheader("How the Recommender Works")
+    st.markdown(
+        "This recommender was trained on 395 real podcast episode descriptions. "
+        "It learned to tell the two podcasts apart by their distinctive vocabulary — "
+        "without being told what to look for. Here's what it discovered."
+    )
+
+    st.markdown("---")
+    st.markdown("### ✅ How reliable is it?")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Accuracy", "98.73%",
+                help="78 out of 79 test episodes were correctly matched")
+    col2.metric("Balanced Score (F1)", "98.70%",
+                help="Equally reliable for both podcasts")
+    col3.metric("Wrong predictions", "1 out of 79",
+                help="Only 1 misclassification in testing")
+    st.success("✅ The recommender exceeds the 90% accuracy target.")
+
+    st.markdown("---")
+    st.markdown("### 🔑 The key phrases that define each podcast")
+    st.markdown(
+        "The longer the bar, the more that word is a signature of that show. "
+        "These were discovered by the model — not manually chosen."
+    )
+
+    features_df = pd.read_csv("outputs/tableau_top_features.csv")
+    col1, col2  = st.columns(2)
+
+    with col1:
+        st.markdown("#### 🟠 Hidden Brain's signature words")
+        hb  = features_df[features_df["podcast"] == "Hidden Brain"].nlargest(10, "abs_score")
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.barh(hb["word"], hb["abs_score"], color="#FF6B35")
+        ax.invert_yaxis()
+        ax.set_xlabel("Word Importance")
+        ax.set_title("Psychology · Behaviour · Emotion")
+        ax.spines[["top", "right"]].set_visible(False)
+        st.pyplot(fig)
+        st.caption("The language of internal human experience")
+
+    with col2:
+        st.markdown("#### 🔵 CNA Deep Dive's signature words")
+        cna = features_df[features_df["podcast"] == "CNA Deep Dive"].nlargest(10, "abs_score")
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.barh(cna["word"], cna["abs_score"], color="#0099CC")
+        ax.invert_yaxis()
+        ax.set_xlabel("Word Importance")
+        ax.set_title("Policy · Institutions · Society")
+        ax.spines[["top", "right"]].set_visible(False)
+        st.pyplot(fig)
+        st.caption("The language of external societal structures")
+
+    st.markdown("---")
+    st.markdown("### 🧪 The 9 approaches tested")
     model_df = pd.read_csv("outputs/tableau_model_comparison.csv")
     model_df["Accuracy %"]  = (model_df["Accuracy"] * 100).round(2)
-    model_df["Balanced Score %"] = (model_df["F1"] * 100).round(2)
+    model_df["F1 %"]        = (model_df["F1"] * 100).round(2)
     model_df["✅ Above 90%"] = model_df["Accuracy %"].apply(lambda x: "✅" if x >= 90 else "❌")
     st.dataframe(
-        model_df[["Method", "Model", "Accuracy %", "Balanced Score %", "✅ Above 90%"]]
+        model_df[["Method", "Model", "Accuracy %", "F1 %", "✅ Above 90%"]]
         .sort_values("Accuracy %", ascending=False)
         .reset_index(drop=True),
         use_container_width=True
     )
-    st.caption(
-        "**Final chosen approach: TF-IDF + Logistic Regression** — "
-        "selected not just for its high accuracy, but because it is an 'explainable' model, "
-        "allowing us to show the exact key phrases driving your recommendation."
-    )
+    st.caption("Final model: **TF-IDF + Logistic Regression** — chosen for explainability, not just accuracy.")
 
     st.markdown("---")
-
-    # ── Tableau dashboard embed ────────────────────────────────────────────
     st.markdown("### 📊 Full Interactive Dashboard")
-    st.markdown(
-        "Explore the full data story below — from the growth of podcast content "
-        "to the distinct identities of each show. Built with Tableau."
-    )
+    st.markdown("Built with Tableau — scroll to explore the full data story.")
 
-    # Updated URL with parameters to force desktop layout and remove toolbars 
-    # to fix the white background and legend spacing issues.
-    tableau_url = (
-        "https://public.tableau.com/views/"
-        "GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft"
-        "?:showVizHome=no&:embed=true&:device=desktop&:toolbar=no"
-    )
-    
-    # Using raw HTML iframe gives us more robust control over the width boundaries
-    html_code = f"""
-    <iframe src="{tableau_url}" width="100%" height="2050" style="border:none;" scrolling="no"></iframe>
+    # Tableau Public official embed code (matches what Tableau generates)
+    tableau_embed = """
+    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative'>
+        <noscript>
+            <a href='#'>
+                <img alt='Social Issues Podcast Recommender'
+                    src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png'
+                    style='border: none' />
+            </a>
+        </noscript>
+        <object class='tableauViz' style='display:none;'>
+            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+            <param name='embed_code_version' value='3' />
+            <param name='site_root' value='' />
+            <param name='name' value='GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft' />
+            <param name='tabs' value='no' />
+            <param name='toolbar' value='yes' />
+            <param name='static_image' value='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1.png' />
+            <param name='animate_transition' value='yes' />
+            <param name='display_static_image' value='yes' />
+            <param name='display_spinner' value='yes' />
+            <param name='display_overlay' value='yes' />
+            <param name='display_count' value='yes' />
+            <param name='language' value='en-GB' />
+            <param name='filter' value='publish=yes' />
+        </object>
+    </div>
+    <script type='text/javascript'>
+        var divElement = document.getElementById('viz1775658569626');
+        var vizElement = divElement.getElementsByTagName('object')[0];
+        if (divElement.offsetWidth > 800) {
+            vizElement.style.width = '1200px';
+            vizElement.style.height = '2027px';
+        } else if (divElement.offsetWidth > 500) {
+            vizElement.style.width = '1200px';
+            vizElement.style.height = '2027px';
+        } else {
+            vizElement.style.width = '100%';
+            vizElement.style.height = '2727px';
+        }
+        var scriptElement = document.createElement('script');
+        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+    </script>
     """
-    components.html(html_code, height=2100)
+    components.html(tableau_embed, height=2150, scrolling=True)
