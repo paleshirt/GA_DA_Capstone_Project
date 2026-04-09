@@ -456,7 +456,7 @@ with tab3:
     st.markdown("### 📊 Full Interactive Dashboard")
     st.markdown("Built with Tableau — scroll to explore the full data story.")
 
-    # ── Tableau dashboard embed ────────────────────────────────────────────
+   # ── Tableau dashboard embed ────────────────────────────────────────────
     st.markdown("### 📊 Full Interactive Dashboard")
     st.markdown(
         "Explore the full data story below — from the growth of podcast content "
@@ -473,18 +473,20 @@ with tab3:
         "&%3Adevice=desktop"
     )
 
-    # Tightened CSS: padding set to 0 and display set to block to remove uneven gaps
+    # Use Flexbox (justify-content: center) to even out the white space on both sides
     html_code = f"""
-    <div style="background-color: #FFFFFF; border-radius: 8px; padding: 0px; margin: 0px; overflow: hidden;">
-        <iframe 
-            src="{embed_url}" 
-            width="100%" 
-            height="2030" 
-            frameborder="0" 
-            style="border: none; display: block; margin: 0 auto;">
-        </iframe>
+    <div style="display: flex; justify-content: center; align-items: flex-start; width: 100%; background-color: transparent;">
+        <div style="background-color: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <iframe 
+                src="{embed_url}" 
+                width="1200" 
+                height="2030" 
+                frameborder="0" 
+                style="border: none; max-width: 100%; display: block;">
+            </iframe>
+        </div>
     </div>
     """
 
-    # Synced height to eliminate extra scrolling/white space at the bottom
-    components.html(html_code, height=2030, scrolling=False)
+    # We use scrolling=False here because the iframe itself has the height locked
+    components.html(html_code, height=2050, scrolling=False)
