@@ -463,27 +463,28 @@ with tab3:
         "to the distinct identities of each show. Built with Tableau."
     )
 
-    # Clean URL with parameters forcing it to ignore mobile layouts
+    # Clean URL with parameters forcing desktop layout
     embed_url = (
         "https://public.tableau.com/views/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft"
         "?%3Aembed=y"
         "&%3AshowVizHome=no"
         "&%3Adisplay_count=no"
         "&%3AshowTabs=no"
-        "&%3Adevice=desktop"  # <-- This stops the legends from scrambling
+        "&%3Adevice=desktop"
     )
 
-    # Wrap the iframe in a white background div to prevent Streamlit's theme from bleeding through
+    # Tightened CSS: padding set to 0 and display set to block to remove uneven gaps
     html_code = f"""
-    <div style="background-color: #FFFFFF; padding: 10px; border-radius: 8px;">
+    <div style="background-color: #FFFFFF; border-radius: 8px; padding: 0px; margin: 0px; overflow: hidden;">
         <iframe 
             src="{embed_url}" 
             width="100%" 
-            height="2050" 
+            height="2030" 
             frameborder="0" 
-            style="border: none;">
+            style="border: none; display: block; margin: 0 auto;">
         </iframe>
     </div>
     """
 
-    components.html(html_code, height=2100, scrolling=True)
+    # Synced height to eliminate extra scrolling/white space at the bottom
+    components.html(html_code, height=2030, scrolling=False)
