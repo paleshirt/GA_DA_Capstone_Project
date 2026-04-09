@@ -452,10 +452,6 @@ with tab3:
     )
     st.caption("Final model: **TF-IDF + Logistic Regression** — chosen for explainability, not just accuracy.")
 
-    st.markdown("---")
-    st.markdown("### 📊 Full Interactive Dashboard")
-    st.markdown("Built with Tableau — scroll to explore the full data story.")
-
    # ── Tableau dashboard embed ────────────────────────────────────────────
     st.markdown("### 📊 Full Interactive Dashboard")
     st.markdown(
