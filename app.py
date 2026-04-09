@@ -463,40 +463,27 @@ with tab3:
         "to the distinct identities of each show. Built with Tableau."
     )
 
-    # Using the raw Tableau JS API embed code for a more stable render
-    # Forced 'device' to 'desktop' to prevent mobile layout breakage
-    html_code = """
-    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative; width: 100%; height: 2027px;'>
-        <noscript>
-            <a href='#'><img alt='Social Issues Podcast Recommender ' src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png' style='border: none' /></a>
-        </noscript>
-        <object class='tableauViz' style='display:none;'>
-            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
-            <param name='embed_code_version' value='3' /> 
-            <param name='site_root' value='' />
-            <param name='name' value='GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft' />
-            <param name='tabs' value='no' />
-            <param name='toolbar' value='no' />
-            <param name='device' value='desktop' />
-            <param name='static_image' value='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1.png' /> 
-            <param name='animate_transition' value='yes' />
-            <param name='display_static_image' value='yes' />
-            <param name='display_spinner' value='yes' />
-            <param name='display_overlay' value='yes' />
-            <param name='display_count' value='yes' />
-            <param name='language' value='en-GB' />
-            <param name='filter' value='publish=yes' />
-        </object>
+    # Clean URL with parameters forcing it to ignore mobile layouts
+    embed_url = (
+        "https://public.tableau.com/views/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft"
+        "?%3Aembed=y"
+        "&%3AshowVizHome=no"
+        "&%3Adisplay_count=no"
+        "&%3AshowTabs=no"
+        "&%3Adevice=desktop"  # <-- This stops the legends from scrambling
+    )
+
+    # Wrap the iframe in a white background div to prevent Streamlit's theme from bleeding through
+    html_code = f"""
+    <div style="background-color: #FFFFFF; padding: 10px; border-radius: 8px;">
+        <iframe 
+            src="{embed_url}" 
+            width="100%" 
+            height="2050" 
+            frameborder="0" 
+            style="border: none;">
+        </iframe>
     </div>
-    <script type='text/javascript'>
-        var divElement = document.getElementById('viz1775658569626');
-        var vizElement = divElement.getElementsByTagName('object');
-        vizElement.style.width='100%';
-        vizElement.style.height='2027px';
-        var scriptElement = document.createElement('script');
-        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-        vizElement.parentNode.insertBefore(scriptElement, vizElement);
-    </script>
     """
-    
-    components.html(html_code, height=2050, scrolling=True)
+
+    components.html(html_code, height=2100, scrolling=True)
