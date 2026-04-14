@@ -12,7 +12,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import os
 from dotenv import load_dotenv
 
-# ── Credentials ────────────────────────────────────────────────────────────
 try:
     SPOTIFY_CLIENT_ID     = st.secrets["SPOTIFY_CLIENT_ID"]
     SPOTIFY_CLIENT_SECRET = st.secrets["SPOTIFY_CLIENT_SECRET"]
@@ -21,129 +20,49 @@ except Exception:
     SPOTIFY_CLIENT_ID     = os.getenv("SPOTIFY_CLIENT_ID")
     SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-# ── Page config (Must be first) ──────────────────────────────────────────────
-st.set_page_config(
-    page_title="Better Questions",
-    page_icon="🎙️",
-    layout="wide"
-)
+st.set_page_config(page_title="Better Questions", page_icon="🎙️", layout="wide")
 
-# ── Theme State Management ──────────────────────────────────────────────────
-if 'theme' not in st.session_state:
-    st.session_state.theme = 'dark'
-
-# Create a top-row layout for Title and Toggle
-col_title, col_theme = st.columns([0.85, 0.15])
-
-with col_theme:
-    # Native toggle, isolated from large CSS scaling below
-    light_mode = st.toggle("Light Mode", value=(st.session_state.theme == 'light'))
-    st.session_state.theme = 'light' if light_mode else 'dark'
-
-# Define Theme Colors
-if st.session_state.theme == 'dark':
-    bg_color = "#0D0D0D"
-    text_color = "#FFFFFF"
-    secondary_text = "#888888"
-    card_bg = "#1A1A1A"
-    border_color = "#2A2A2A"
-    input_bg = "#1A1A1A"
-else:
-    bg_color = "#FDFBF5"  # Soft, warmer cream
-    text_color = "#1A1A1A"
-    secondary_text = "#555555"
-    card_bg = "#FFFFFF"
-    border_color = "#E0E0E0"
-    input_bg = "#FFFFFF"
-
-# ── Global CSS (150% Scaling & Theme) ──────────────────────────────────────
-st.markdown(f"""
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-
-/* Global Scaling (150% effect) */
-html, body, .block-container, p, span, div {{
-    background-color: {bg_color} !important;
-    color: {text_color} !important;
-    font-family: 'Inter', 'Helvetica Neue', sans-serif;
-    font-size: 24px; 
-}}
-
-/* Scaling Headers */
-h1 {{ font-size: 4rem !important; margin-bottom: 1.5rem !important; font-weight: 900 !important; letter-spacing: -0.5px; }}
-h2 {{ font-size: 3rem !important; font-weight: 900 !important; letter-spacing: -0.5px; }}
-h3 {{ font-size: 2.2rem !important; font-weight: 900 !important; letter-spacing: -0.5px; }}
-h4 {{ font-size: 1.8rem !important; font-weight: 900 !important; letter-spacing: -0.5px; }}
-
-.block-container {{
-    padding: 3rem 5rem !important;
-    max-width: 1400px;
-}}
-
-/* Ensure the Toggle stays small and Apple-like */
-[data-testid="stToggle"] * {{
-    font-size: 16px !important;
-}}
-
-/* Input Box Scaling */
-.stTextInput>div>div>input {{
-    background-color: {input_bg} !important;
-    color: {text_color} !important;
-    border: 2px solid {border_color} !important;
-    border-radius: 12px;
-    padding: 20px !important;
-    font-size: 24px !important;
-}}
-
-/* Podcast Cards */
-.podcast-card {{
-    background-color: {card_bg};
-    border-radius: 16px;
-    padding: 32px;
-    margin-bottom: 30px;
-    border: 2px solid {border_color};
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}}
-.podcast-card:hover {{
-    border-color: #888888;
-    transform: translateY(-4px);
-}}
-
-.theme-badge {{
-    display: inline-block;
-    padding: 6px 18px;
-    border-radius: 24px;
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 12px;
-    margin-bottom: 12px;
-}}
-
-/* Tab Styling */
-.stTabs [data-baseweb="tab-list"] {{ 
-    gap: 20px; 
-    background: transparent;
-    border-bottom: 2px solid {border_color};
-}}
-.stTabs [data-baseweb="tab"] {{
-    font-size: 24px !important;
-    font-weight: 700;
-    padding: 15px 0px;
-    color: {secondary_text};
-    background: transparent;
-    border: none;
-}}
-.stTabs [aria-selected="true"] {{
-    color: {text_color} !important;
-    border-bottom: 3px solid {text_color} !important;
-}}
-
-#MainMenu, footer, header {{ visibility: hidden; }}
+html, body, [class*="css"] { background-color: #0D0D0D !important; color: #FFFFFF !important; font-family: 'Inter', 'Helvetica Neue', sans-serif; }
+#MainMenu, footer, header { visibility: hidden; }
+.block-container { padding: 2rem 3rem !important; max-width: 1200px; }
+.stTabs [data-baseweb="tab-list"] { gap: 8px; background: transparent; border-bottom: 1px solid #2A2A2A; padding-bottom: 4px; }
+.stTabs [data-baseweb="tab"] { background: transparent !important; color: #888 !important; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border: none !important; padding: 8px 20px; border-radius: 20px !important; }
+.stTabs [aria-selected="true"] { background: #FFFFFF !important; color: #0D0D0D !important; }
+.stFormSubmitButton > button, .stButton > button { background: #1DB954 !important; color: #000000 !important; font-weight: 700 !important; font-size: 14px !important; border: none !important; border-radius: 30px !important; padding: 12px 32px !important; letter-spacing: 0.04em; text-transform: uppercase; }
+.stFormSubmitButton > button:hover, .stButton > button:hover { background: #1ed760 !important; }
+.stTextArea textarea { background: #1A1A1A !important; color: #FFFFFF !important; border: 1px solid #333 !important; border-radius: 12px !important; font-size: 15px !important; padding: 16px !important; }
+.stTextArea textarea:focus { border-color: #1DB954 !important; }
+[data-testid="metric-container"] { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 16px; padding: 20px !important; }
+[data-testid="metric-container"] label { color: #888 !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.08em; }
+[data-testid="metric-container"] [data-testid="stMetricValue"] { color: #FFFFFF !important; font-size: 28px !important; font-weight: 700 !important; }
+.streamlit-expanderHeader { background: #1A1A1A !important; border: 1px solid #2A2A2A !important; border-radius: 12px !important; color: #FFFFFF !important; font-weight: 700; }
+.streamlit-expanderContent { background: #141414 !important; border: 1px solid #2A2A2A !important; border-top: none !important; border-radius: 0 0 12px 12px !important; }
+hr { border-color: #2A2A2A !important; }
+.stCaption { color: #666 !important; font-size: 12px !important; }
+.stSpinner > div { border-top-color: #1DB954 !important; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0D0D0D; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+.pill-hb { display: inline-block; background: #FF6B35; color: #FFFFFF; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin: 3px; }
+.pill-cna { display: inline-block; background: #4BC8E8; color: #000000; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin: 3px; }
+.stat-card { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 16px; padding: 24px; text-align: center; }
+.stat-num { font-size: 38px; font-weight: 900; color: #1DB954; line-height: 1; margin-bottom: 8px; }
+.stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
+.podcast-card { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 20px; padding: 28px; }
+.podcast-card-hb { border-top: 4px solid #FF6B35; }
+.podcast-card-cna { border-top: 4px solid #4BC8E8; }
+.result-header { background: #111; border: 1px solid #1DB954; border-radius: 20px; padding: 28px; margin: 16px 0; }
+.confidence-num { font-size: 52px; font-weight: 900; color: #1DB954; line-height: 1; }
+.confidence-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+.why-box { background: #0A150A; border-left: 3px solid #1DB954; border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 14px; line-height: 1.7; color: #CCCCCC; }
+.section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+.example-phrase { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #CCCCCC; margin-bottom: 6px; line-height: 1.5; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Load model ─────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
     with open("outputs/models/tfidf_vectorizer.pkl", "rb") as f:
@@ -156,219 +75,283 @@ def load_model():
 def load_data():
     raw_df   = pd.read_csv("data_raw/episodes_raw.csv")
     clean_df = pd.read_csv("data_clean/episodes_clean.csv")
-    df = pd.merge(
-        clean_df,
-        raw_df[['spotify_url', 'release_date', 'title']],
-        on='title',
-        how='left'
-    )
-    return df
+    return raw_df, clean_df
 
-tfidf, model = load_model()
-df = load_data()
+tfidf, model     = load_model()
+raw_df, clean_df = load_data()
+feature_names    = tfidf.get_feature_names_out()
+coefficients     = model.coef_[0]
+stop_words       = set(ENGLISH_STOP_WORDS)
 
-# ── Helpers ────────────────────────────────────────────────────────────────
-def clean_text(text):
+SYNONYM_MAP = {
+    "stress": ["work","pressure","mental","health","emotion"],
+    "burnout": ["work","pressure","mental","health"],
+    "anxiety": ["mental","health","fear","psychological"],
+    "depression": ["mental","health","psychological","mood","emotion"],
+    "bias": ["unconscious","psychological","behavior","decision"],
+    "irrational": ["behavior","decision","psychological","emotion"],
+    "housing": ["public","policy","government","national","social"],
+    "hdb": ["public","policy","government","national"],
+    "cost": ["public","policy","social","national"],
+    "jobs": ["workers","business","national","social","policy"],
+    "inequality": ["social","policy","public","national","workers"],
+    "racism": ["social","policy","bias","psychological","behavior"],
+    "climate": ["environment","policy","national","public","social"],
+    "relationships": ["conversation","people","psychological","lives"],
+    "happiness": ["psychological","people","lives","purpose","emotion"],
+    "leadership": ["psychological","people","work","behavior","decision"],
+    "mental": ["psychological","health","emotion","people","lives"],
+    "fear": ["psychological","emotion","behavior","people"],
+    "grief": ["psychological","emotion","lives","people"],
+    "identity": ["psychological","social","people","behavior"],
+    "education": ["school","national","public","policy","social"],
+    "poverty": ["social","policy","public","national","workers"],
+}
+
+def expand_input(text):
+    words = text.lower().split()
+    expansions = []
+    for word in words:
+        if word in SYNONYM_MAP:
+            expansions.extend(SYNONYM_MAP[word])
+    return text + " " + " ".join(expansions) if expansions else text
+
+def clean_input(text):
     text = text.lower()
-    text = re.sub(r'http\S+|www\S+|https\S+', '', text, flags=re.MULTILINE)
-    text = re.sub(r'\b(omnystudio|adswizz|listener|privacy|information|click|here|podcast)\b', '', text)
-    text = re.sub(r'[^\w\s]', '', text)
-    words = text.split()
-    words = [w for w in words if w not in ENGLISH_STOP_WORDS]
-    return " ".join(words)
+    text = re.sub(r"http\S+|www\S+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return " ".join([w for w in text.split() if w not in stop_words])
 
-def get_podcast_color(podcast_name):
-    # CNA is Blue, Hidden Brain is Orange
-    if "CNA" in podcast_name:
-        return "#0072B2" # Blue
-    else:
-        return "#E68A00" # Orange
+def get_spotify_episode_id(url):
+    match = re.search(r"episode/([a-zA-Z0-9]+)", url)
+    return match.group(1) if match else None
 
-def plot_top_features(tfidf, model, top_n=10, theme='dark'):
-    feature_names = np.array(tfidf.get_feature_names_out())
-    coef = model.coef_
-    classes = model.classes_
-    
-    top_positive_idx = np.argsort(coef)[-top_n:]
-    top_negative_idx = np.argsort(coef)[:top_n]
-    
-    top_positive_features = feature_names[top_positive_idx]
-    top_positive_coefs = coef[top_positive_idx]
-    
-    top_negative_features = feature_names[top_negative_idx]
-    top_negative_coefs = coef[top_negative_idx]
-    
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-    
-    # Dynamic background colors based on mode
-    plot_bg = '#0D0D0D' if theme == 'dark' else '#FDFBF5'
-    plot_text = 'white' if theme == 'dark' else 'black'
-    spine_color = '#333333' if theme == 'dark' else '#CCCCCC'
-    
-    fig.patch.set_facecolor(plot_bg)
-    
-    color_pos = get_podcast_color(classes)
-    ax1.barh(top_positive_features, top_positive_coefs, color=color_pos)
-    ax1.set_title(f"Strongest words for\n{classes}", color=plot_text, pad=20, weight='bold', fontsize=16)
-    ax1.tick_params(colors=plot_text, labelsize=12)
-    ax1.set_facecolor(plot_bg)
-    ax1.spines['bottom'].set_color(spine_color)
-    ax1.spines['top'].set_visible(False)
-    ax1.spines['right'].set_visible(False)
-    ax1.spines['left'].set_color(spine_color)
-    
-    color_neg = get_podcast_color(classes)
-    ax2.barh(top_negative_features[::-1], np.abs(top_negative_coefs[::-1]), color=color_neg)
-    ax2.set_title(f"Strongest words for\n{classes}", color=plot_text, pad=20, weight='bold', fontsize=16)
-    ax2.tick_params(colors=plot_text, labelsize=12)
-    ax2.set_facecolor(plot_bg)
-    ax2.spines['bottom'].set_color(spine_color)
-    ax2.spines['top'].set_visible(False)
-    ax2.spines['right'].set_visible(False)
-    ax2.spines['left'].set_color(spine_color)
-    
-    plt.tight_layout()
-    return fig
+PODCAST_INFO = {
+    "Hidden Brain": {
+        "host": "Shankar Vedantam",
+        "style": "Psychology · Behaviour · Human Experience",
+        "description": "Hidden Brain explores the unconscious patterns that drive human behaviour. Hosted by science journalist Shankar Vedantam, each episode draws on psychology, neuroscience, and social science to explain why we think and act the way we do.",
+        "spotify_show_id": "20Gf4IAauFrfj7RBkjcWxh",
+        "color": "#FF6B35",
+        "pill_class": "pill-hb",
+        "card_class": "podcast-card-hb",
+        "label": "The Inside View",
+        "identity": "psychology and human behaviour",
+        "lens": "It explores the psychological and behavioural science behind this topic.",
+        "best_for": ["Why people make irrational decisions","The psychology of relationships and emotions","Unconscious bias and behaviour","Motivation, happiness, and purpose","Social patterns and human connection"],
+    },
+    "CNA Deep Dive": {
+        "host": "Steven Chia & Tiffany Ang",
+        "style": "Policy · Society · Singapore & Asia",
+        "description": "CNA Deep Dive unpacks Singapore's most pressing social, economic, and political issues. Hosted by Steven Chia and Tiffany Ang, each episode brings in expert guests to explain the context behind the headlines.",
+        "spotify_show_id": "2hcojizvVOLz8dTRblRuSC",
+        "color": "#4BC8E8",
+        "pill_class": "pill-cna",
+        "card_class": "podcast-card-cna",
+        "label": "The Outside View",
+        "identity": "Singapore social issues and public policy",
+        "lens": "It examines this topic through a Singapore and public policy lens.",
+        "best_for": ["Singapore housing and cost of living","Government policy and public services","Mental health in Singapore society","Climate change and sustainability","Education, workforce, and social inequality"],
+    },
+}
 
-# ── App Layout ─────────────────────────────────────────────────────────────
-with col_title:
-    st.title("Better Questions")
-    st.markdown(f"<p style='font-size: 28px; color:{secondary_text}; font-weight:700;'>Transparent, NLP-driven podcast recommendations.</p>", unsafe_allow_html=True)
+def recommend(user_input, n=2):
+    expanded   = expand_input(user_input)
+    cleaned    = clean_input(expanded)
+    user_vec   = tfidf.transform([cleaned])
+    pred_label = model.predict(user_vec)[0]
+    pred_proba = model.predict_proba(user_vec)[0]
+    confidence = round(max(pred_proba) * 100, 1)
+    podcast_name = "Hidden Brain" if pred_label == 0 else "CNA Deep Dive"
+    feature_list = list(feature_names)
+    coef_sign    = coefficients if pred_label == 1 else -coefficients
+    input_words  = cleaned.split()
+    word_scores  = {w: coef_sign[feature_list.index(w)] for w in input_words if w in feature_list}
+    top_keywords = sorted(word_scores, key=word_scores.get, reverse=True)[:5]
+    theme_str    = ", ".join(top_keywords) if top_keywords else "social issues"
+    matched_clean = clean_df[clean_df["label"] == pred_label].copy()
+    matched_raw   = raw_df[raw_df["podcast"] == podcast_name].copy()
+    matched_raw   = matched_raw[matched_raw["title"].isin(matched_clean["title"])].copy()
+    matched_clean = matched_clean.reset_index(drop=True)
+    matched_raw   = matched_raw.reset_index(drop=True)
+    ep_vecs       = tfidf.transform(matched_clean["clean_text"].fillna(""))
+    cos_scores    = cosine_similarity(user_vec, ep_vecs)[0]
+    def keyword_overlap(ep_text, keywords):
+        if not keywords: return 0
+        ep_words = set(str(ep_text).lower().split())
+        return sum(1 for kw in keywords if kw in ep_words) / len(keywords)
+    overlap_scores  = matched_clean["clean_text"].apply(lambda x: keyword_overlap(x, input_words)).values
+    title_scores    = matched_raw["title"].apply(lambda x: keyword_overlap(str(x).lower(), input_words)).values
+    combined_scores = 0.6 * cos_scores + 0.2 * overlap_scores + 0.2 * title_scores
+    matched_clean["score"] = combined_scores
+    top_idx      = matched_clean.nlargest(n, "score").index.tolist()
+    top_episodes = matched_raw.loc[top_idx]
+    return podcast_name, confidence, theme_str, top_keywords, top_episodes, matched_clean, top_idx
 
-tab1, tab2 = st.tabs(["Search & Recommend", "Data & Methodology"])
+# HEADER
+st.markdown("""
+<div style="padding: 2rem 0 1rem;">
+  <div style="font-size: 11px; font-weight: 700; color: #1DB954; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Social-Issues Podcast Recommender</div>
+  <div style="font-size: 48px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 16px;">Better Questions</div>
+  <div style="font-size: 15px; color: #AAAAAA; max-width: 620px; line-height: 1.7;">Free podcasts are a vital stepping stone for self-discovery and healing. Type what's on your mind — we'll find the expert conversation that meets you there.</div>
+</div>
+<hr style="border-color: #2A2A2A; margin: 0 0 24px;">
+""", unsafe_allow_html=True)
 
-# ── TAB 1: Search ──────────────────────────────────────────────────────────
+tab1, tab2, tab3 = st.tabs(["Find My Podcast", "About the Podcasts", "Data Insights"])
+
+# TAB 1
 with tab1:
-    st.markdown("<br>", unsafe_allow_html=True)
-    user_input = st.text_input(
-        "What are you curious about?",
-        placeholder="e.g., 'I want to understand Singapore housing policy' or 'Why do we make irrational decisions?'",
-        label_visibility="collapsed"
-    )
-    
-    if user_input:
-        with st.spinner("Analyzing semantics..."):
-            cleaned_input = clean_text(user_input)
-            input_vec = tfidf.transform([cleaned_input])
-            
-            prediction = model.predict(input_vec)
-            probabilities = model.predict_proba(input_vec)
-            confidence = max(probabilities) * 100
-            
-            predicted_podcast = prediction
-            podcast_df = df[df['podcast'] == predicted_podcast].copy()
-            
-            # Find best episodes via cosine similarity
-            corpus_vecs = tfidf.transform(podcast_df['description_clean'].fillna(""))
-            similarities = cosine_similarity(input_vec, corpus_vecs).flatten()
-            podcast_df['similarity'] = similarities
-            top_episodes = podcast_df.sort_values(by='similarity', ascending=False).head(2)
-            
-            # Extract keywords (explainability)
-            input_words = cleaned_input.split()
-            feature_names = tfidf.get_feature_names_out()
-            word_coefs = []
-            for word in input_words:
-                if word in feature_names:
-                    idx = np.where(feature_names == word)
-                    coef = model.coef_[idx]
-                    word_coefs.append((word, coef))
-            
-            highlight_color = "#E68A00" if "Hidden Brain" in predicted_podcast else "#0072B2"
-            badge_bg = "rgba(230, 138, 0, 0.15)" if "Hidden Brain" in predicted_podcast else "rgba(0, 114, 178, 0.15)"
-            
-            st.markdown(f"### Best Match: **<span style='color:{highlight_color}'>{predicted_podcast}</span>** ({confidence:.1f}% match)", unsafe_allow_html=True)
-            
-            if word_coefs:
-                st.markdown(f"<strong style='color:{text_color};'>Why we chose this (Key Themes):</strong>", unsafe_allow_html=True)
-                badges_html = ""
-                for word, coef in word_coefs:
-                    badges_html += f"<span class='theme-badge' style='background-color:{badge_bg}; color:{highlight_color}; border: 1px solid {highlight_color}'>{word.upper()}</span>"
-                st.markdown(badges_html, unsafe_allow_html=True)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            # Display Episodes
-            col1, col2 = st.columns(2)
-            cols = [col1, col2]
-            
-            for i, (_, row) in enumerate(top_episodes.iterrows()):
-                with cols[i]:
-                    st.markdown(f"""
-                    <div class="podcast-card" style="border-top: 6px solid {highlight_color};">
-                        <h4 style="margin-top:0; color:{text_color};">{row['title']}</h4>
-                        <p style="color:{secondary_text}; font-size:18px; margin-bottom:16px;">📅 {row['release_date']}</p>
-                        <p style="color:{text_color}; font-size:20px; line-height:1.5;">{str(row['description'])[:200]}...</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    spotify_url = str(row['spotify_url'])
-                    if "spotify.com/episode/" in spotify_url or "spotify.com" in spotify_url:
-                        embed_url = spotify_url.replace("/episode/", "/embed/episode/")
-                        components.iframe(embed_url, height=152)
+    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">What are you curious about?</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:20px">Describe a topic, a feeling, or a question. We match you to the podcast whose vocabulary mirrors yours — and show exactly which words drove that choice.</div>', unsafe_allow_html=True)
+    st.caption("💡 Mac: ⌘ + Enter  |  Windows: Ctrl + Enter")
+
+    with st.form(key="search_form", clear_on_submit=False):
+        user_input = st.text_area("", placeholder='e.g. "why do people make irrational decisions"  or  "Singapore housing policy"', height=110, label_visibility="collapsed")
+        submitted  = st.form_submit_button("Find My Podcast →", type="primary")
+
+    if submitted:
+        if user_input.strip():
+            with st.spinner("Matching your interests..."):
+                podcast_name, confidence, theme_str, top_keywords, top_episodes, matched_clean, top_idx = recommend(user_input)
+            info = PODCAST_INFO[podcast_name]
+            st.markdown(f"""
+            <div class="result-header">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px">
+                <div>
+                  <div style="font-size:11px;font-weight:700;color:{info['color']};text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">{info['label']}</div>
+                  <div style="font-size:32px;font-weight:900;letter-spacing:-0.02em;margin-bottom:4px">{podcast_name}</div>
+                  <div style="font-size:13px;color:#888">{info['style']} · {info['host']}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="confidence-num">{confidence}%</div>
+                  <div class="confidence-label">Match confidence</div>
+                </div>
+              </div>
+            </div>""", unsafe_allow_html=True)
+            st.markdown(f'<div class="why-box"><strong style="color:#1DB954">Why this podcast?</strong><br>Your input contained themes related to <strong>{theme_str}</strong> — words strongly associated with <em>{podcast_name}</em>\'s focus on {info["identity"]}.</div>', unsafe_allow_html=True)
+            if top_keywords:
+                st.markdown('<div class="section-label" style="margin-top:20px">Key phrases detected</div>', unsafe_allow_html=True)
+                st.markdown(" ".join([f'<span class="{info["pill_class"]}">{kw}</span>' for kw in top_keywords]), unsafe_allow_html=True)
+            st.markdown('<div class="section-label" style="margin-top:24px">Top 2 episodes for you</div>', unsafe_allow_html=True)
+            for rank, (idx, row) in enumerate(top_episodes.iterrows(), 1):
+                score      = matched_clean.loc[top_idx[rank-1], "score"]
+                episode_id = get_spotify_episode_id(row["spotify_url"])
+                with st.expander(f"#{rank}  {row['title']}  —  {round(score*100,1)}% match", expanded=True):
+                    st.markdown(f'<div style="color:#888;font-size:13px;margin-bottom:8px">Released {row["release_date"]}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="font-size:14px;color:#CCCCCC;line-height:1.6;margin-bottom:16px">This episode from <em>{podcast_name}</em> closely matches your interest in <strong>{theme_str}</strong>. {info["lens"]}</div>', unsafe_allow_html=True)
+                    if episode_id:
+                        components.html(f'<iframe style="border-radius:12px" src="https://open.spotify.com/embed/episode/{episode_id}?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>', height=160)
                     else:
-                        st.markdown(f"[Listen on Spotify]({spotify_url})")
+                        st.markdown(f"[Listen on Spotify →]({row['spotify_url']})")
+        else:
+            st.warning("Please describe what you're interested in.")
 
-# ── TAB 2: Data ────────────────────────────────────────────────────────────
+    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">Not sure what to type? Try these</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown('<span class="pill-hb" style="margin-bottom:12px;display:inline-block">Hidden Brain</span>', unsafe_allow_html=True)
+        for p in ["the psychology behind why people avoid making difficult decisions","unconscious bias and how it shapes human behavior","the science of happiness and what truly motivates people"]:
+            st.markdown(f'<div class="example-phrase">"{p}"</div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<span class="pill-cna" style="margin-bottom:12px;display:inline-block">CNA Deep Dive</span>', unsafe_allow_html=True)
+        for p in ["government policy on housing and cost of living in Singapore","mental health support and social services for young people","Singapore's approach to climate change and sustainability"]:
+            st.markdown(f'<div class="example-phrase">"{p}"</div>', unsafe_allow_html=True)
+
+# TAB 2
 with tab2:
-    st.markdown("### Under the Hood")
-    
-    st.markdown("#### 1. What the Model Learned")
-    st.markdown(
-        f"<p style='color:{secondary_text}; font-size:20px;'>By analyzing 400 episode descriptions, the TF-IDF model organically separated the vocabulary "
-        "of psychology (Hidden Brain) from the vocabulary of policy (CNA Deep Dive).</p>",
-        unsafe_allow_html=True
-    )
-    
-    # REINSTATED: The Matplotlib feature plot, now dynamically colored based on theme
-    fig = plot_top_features(tfidf, model, theme=st.session_state.theme)
-    st.pyplot(fig)
-    
-    st.markdown("---")
-    st.markdown("#### 2. Model Evaluation")
-    st.markdown(
-        f"<p style='color:{secondary_text}; font-size:20px;'>To ensure the most transparent approach, 9 different combinations of text analysis methods "
-        "and classifiers were tested. Every single one exceeded the 90% accuracy target.</p>",
-        unsafe_allow_html=True
-    )
+    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:15px;color:#AAAAAA;margin-bottom:28px">Two podcasts. Both cover social issues. Neither sounds the same.</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2, gap="large")
+    for col, key in zip([col1, col2], ["Hidden Brain", "CNA Deep Dive"]):
+        info = PODCAST_INFO[key]
+        show_id = info["spotify_show_id"]
+        with col:
+            st.markdown(f"""
+            <div class="podcast-card {info['card_class']}">
+              <div style="font-size:11px;font-weight:700;color:{info['color']};text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">{info['label']}</div>
+              <div style="font-size:26px;font-weight:900;margin-bottom:4px">{key}</div>
+              <div style="font-size:13px;color:#888;margin-bottom:16px">{info['host']}</div>
+              <div style="font-size:14px;color:#CCCCCC;line-height:1.7;margin-bottom:20px">{info['description']}</div>
+              <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Best for</div>
+              {"".join([f'<div style="font-size:13px;color:#CCCCCC;padding:6px 0;border-bottom:1px solid #2A2A2A">→ {t}</div>' for t in info['best_for']])}
+            </div>""", unsafe_allow_html=True)
+            st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+            components.html(f'<iframe style="border-radius:12px" src="https://open.spotify.com/embed/show/{show_id}?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>', height=160)
+    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">What separates them?</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        st.markdown('<div style="background:#1A1A1A;border-left:3px solid #FF6B35;border-radius:0 12px 12px 0;padding:16px 20px;font-size:14px;color:#CCCCCC;line-height:1.7"><strong style="color:#FF6B35">Hidden Brain</strong> approaches social issues from the <strong>inside out</strong> — starting with individual psychology and working outward. Episodes are topic-focused and timeless.</div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<div style="background:#1A1A1A;border-left:3px solid #4BC8E8;border-radius:0 12px 12px 0;padding:16px 20px;font-size:14px;color:#CCCCCC;line-height:1.7"><strong style="color:#4BC8E8">CNA Deep Dive</strong> approaches social issues from the <strong>outside in</strong> — starting with policy, institutions, and current events. Episodes are timely and Singapore-focused.</div>', unsafe_allow_html=True)
 
-    # REINSTATED: The Model Evaluation Table
+# TAB 3
+with tab3:
+    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:15px;color:#AAAAAA;margin-bottom:28px">Trained on 395 real episode descriptions. The model learned the vocabulary of each podcast — without being told what to look for.</div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3, gap="medium")
+    with col1:
+        st.markdown('<div class="stat-card"><div class="stat-num">98.73%</div><div class="stat-label">Accuracy</div><div style="font-size:12px;color:#666;margin-top:8px">78 of 79 episodes correct</div></div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<div class="stat-card"><div class="stat-num">98.70%</div><div class="stat-label">F1 Score</div><div style="font-size:12px;color:#666;margin-top:8px">Balanced across both podcasts</div></div>', unsafe_allow_html=True)
+    with col3:
+        st.markdown('<div class="stat-card"><div class="stat-num">1/79</div><div class="stat-label">Wrong predictions</div><div style="font-size:12px;color:#666;margin-top:8px">One understandable edge case</div></div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="background:#0A150A;border:1px solid #1DB954;border-radius:12px;padding:14px 20px;font-size:14px;color:#1DB954;font-weight:700;margin-bottom:32px">✓ Exceeds the 90% accuracy target set at project start</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-label">The signature words of each podcast</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:20px">Discovered by the model — never manually labelled. The longer the bar, the more that word is a signature of that show.</div>', unsafe_allow_html=True)
+    try:
+        features_df = pd.read_csv("outputs/tableau_top_features.csv")
+        col1, col2  = st.columns(2, gap="large")
+        for col, podcast, color, pill_class, subtitle in [
+            (col1, "Hidden Brain", "#FF6B35", "pill-hb", "The language of internal experience"),
+            (col2, "CNA Deep Dive", "#4BC8E8", "pill-cna", "The language of external structures")
+        ]:
+            with col:
+                st.markdown(f'<span class="{pill_class}">{podcast}</span><div style="font-size:12px;color:#888;margin:8px 0 12px;font-style:italic">{subtitle}</div>', unsafe_allow_html=True)
+                df = features_df[features_df["podcast"] == podcast].nlargest(10, "abs_score")
+                fig, ax = plt.subplots(figsize=(5, 4))
+                fig.patch.set_facecolor("#1A1A1A")
+                ax.set_facecolor("#1A1A1A")
+                ax.barh(df["word"], df["abs_score"], color=color, height=0.65)
+                ax.invert_yaxis()
+                ax.set_xlabel("Word Importance", color="#888", fontsize=10)
+                ax.tick_params(colors="#CCCCCC", labelsize=11)
+                for sp in ax.spines.values(): sp.set_visible(False)
+                ax.grid(axis="x", color="#2A2A2A", linewidth=0.5)
+                plt.tight_layout()
+                st.pyplot(fig)
+                plt.close()
+    except Exception:
+        st.info("Feature chart data not found.")
+
+    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">All 9 model approaches tested</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:20px">Every combination exceeded 90% accuracy. TF-IDF + Logistic Regression was chosen for explainability, not just accuracy.</div>', unsafe_allow_html=True)
     try:
         model_df = pd.read_csv("outputs/tableau_model_comparison.csv")
-        model_df["Accuracy %"]  = (model_df["Accuracy"] * 100).round(2)
-        model_df["F1 %"]        = (model_df["F1"] * 100).round(2)
-        model_df["✅ Above 90%"] = model_df["Accuracy %"].apply(lambda x: "✅" if x >= 90 else "❌")
-        st.dataframe(
-            model_df[["Method", "Model", "Accuracy %", "F1 %", "✅ Above 90%"]]
-            .sort_values("Accuracy %", ascending=False)
-            .reset_index(drop=True),
-            use_container_width=True
-        )
+        model_df["Accuracy %"] = (model_df["Accuracy"] * 100).round(2)
+        model_df["F1 %"]       = (model_df["F1"] * 100).round(2)
+        model_df["Result"]     = model_df["Accuracy %"].apply(lambda x: "✅" if x >= 90 else "❌")
+        st.dataframe(model_df[["Method","Model","Accuracy %","F1 %","Result"]].sort_values("Accuracy %", ascending=False).reset_index(drop=True), use_container_width=True, hide_index=True)
+        st.caption("Final model: TF-IDF + Logistic Regression — same accuracy as Naive Bayes, but explains its reasoning.")
     except Exception:
-        st.info("Evaluation data will appear here once 'outputs/tableau_model_comparison.csv' is generated.")
-        
-    st.caption(
-        "**Final chosen approach: TF-IDF + Logistic Regression** — "
-        "selected not just for accuracy, but because it can explain its reasoning in plain language."
-    )
+        st.info("Model comparison data not found.")
 
-    st.markdown("---")
-
-    # ── Tableau dashboard embed ────────────────────────────────────────────
-    st.markdown("### 📊 Full Interactive Dashboard")
-    st.markdown(
-        f"<p style='color:{secondary_text}; font-size:20px;'>Explore the full data story below — from the growth of podcast content "
-        "to the distinct identities of each show. Built with Tableau.</p>",
-        unsafe_allow_html=True
-    )
-
-    # REINSTATED: The full Tableau embed code with 100% width fix
-    tableau_html = """
-    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative; width: 100%;'>
-        <noscript><a href='#'><img alt='1 ' src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png' style='border: none' /></a></noscript>
-        <object class='tableauViz'  style='display:none;'>
-            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
-            <param name='embed_code_version' value='3' /> 
+    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">Full interactive dashboard</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:16px">Built with Tableau — scroll to explore the full data story.</div>', unsafe_allow_html=True)
+    tableau_embed = """
+    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative'>
+        <noscript><a href='#'><img alt='Social Issues Podcast Recommender' src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png' style='border: none' /></a></noscript>
+        <object class='tableauViz' style='display:none;'>
+            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+            <param name='embed_code_version' value='3' />
             <param name='site_root' value='' />
             <param name='name' value='GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft' />
             <param name='tabs' value='no' />
@@ -385,14 +368,12 @@ with tab2:
     </div>
     <script type='text/javascript'>
         var divElement = document.getElementById('viz1775658569626');
-        var vizElement = divElement.getElementsByTagName('object');
-        if (divElement.offsetWidth > 800) { vizElement.style.width='100%'; vizElement.style.height='2027px'; }
-        else if (divElement.offsetWidth > 500) { vizElement.style.width='100%'; vizElement.style.height='2027px'; }
+        var vizElement = divElement.getElementsByTagName('object')[0];
+        if (divElement.offsetWidth > 800) { vizElement.style.width='1200px'; vizElement.style.height='2027px'; }
+        else if (divElement.offsetWidth > 500) { vizElement.style.width='1200px'; vizElement.style.height='2027px'; }
         else { vizElement.style.width='100%'; vizElement.style.height='2727px'; }
         var scriptElement = document.createElement('script');
         scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
         vizElement.parentNode.insertBefore(scriptElement, vizElement);
-    </script>
-    """
-    
-    components.html(tableau_html, height=2050, scrolling=True)
+    </script>"""
+    components.html(tableau_embed, height=2150, scrolling=True)
