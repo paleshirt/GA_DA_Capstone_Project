@@ -22,47 +22,192 @@ except Exception:
 
 st.set_page_config(page_title="Better Questions", page_icon="🎙️", layout="wide")
 
-st.markdown("""
+# ── COLOURS ──────────────────────────────────────────────────────────────────
+# Hidden Brain = BLUE  (#4BC8E8)
+# CNA Deep Dive = ORANGE (#FF6B35)
+HB_COLOR  = "#4BC8E8"   # Hidden Brain — BLUE
+CNA_COLOR = "#FF6B35"   # CNA Deep Dive — ORANGE
+
+# ── LIGHT / DARK MODE STATE ──────────────────────────────────────────────────
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+# Toggle button — top-right via columns trick
+header_left, header_right = st.columns([10, 1])
+with header_right:
+    mode_icon = "☀️" if st.session_state.dark_mode else "🌙"
+    if st.button(mode_icon, key="mode_toggle", help="Toggle light/dark mode"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
+
+dark = st.session_state.dark_mode
+
+# ── THEME VARIABLES ───────────────────────────────────────────────────────────
+if dark:
+    BG          = "#0D0D0D"
+    BG2         = "#1A1A1A"
+    BG3         = "#141414"
+    TEXT        = "#FFFFFF"
+    TEXT2       = "#AAAAAA"
+    TEXT3       = "#CCCCCC"
+    TEXT4       = "#888888"
+    BORDER      = "#2A2A2A"
+    TAB_SEL_BG  = "#FFFFFF"
+    TAB_SEL_FG  = "#0D0D0D"
+    INPUT_BG    = "#1A1A1A"
+    INPUT_FG    = "#FFFFFF"
+    INPUT_BORD  = "#333333"
+    WHY_BG      = "#0A150A"
+    RESULT_BG   = "#111111"
+    PLOT_BG     = "#1A1A1A"
+    PLOT_TICK   = "#CCCCCC"
+    PLOT_GRID   = "#2A2A2A"
+    SCROLLBAR   = "#333333"
+else:
+    BG          = "#F5F5F0"   # off-white — easy on eyes
+    BG2         = "#EAEAE4"
+    BG3         = "#E0E0DA"
+    TEXT        = "#111111"
+    TEXT2       = "#444444"
+    TEXT3       = "#333333"
+    TEXT4       = "#666666"
+    BORDER      = "#CCCCCC"
+    TAB_SEL_BG  = "#111111"
+    TAB_SEL_FG  = "#FFFFFF"
+    INPUT_BG    = "#FFFFFF"
+    INPUT_FG    = "#111111"
+    INPUT_BORD  = "#BBBBBB"
+    WHY_BG      = "#E8F5E9"
+    RESULT_BG   = "#FFFFFF"
+    PLOT_BG     = "#EAEAE4"
+    PLOT_TICK   = "#333333"
+    PLOT_GRID   = "#CCCCCC"
+    SCROLLBAR   = "#AAAAAA"
+
+# ── GLOBAL CSS ────────────────────────────────────────────────────────────────
+st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-html, body, [class*="css"] { background-color: #0D0D0D !important; color: #FFFFFF !important; font-family: 'Inter', 'Helvetica Neue', sans-serif; }
-#MainMenu, footer, header { visibility: hidden; }
-.block-container { padding: 2rem 3rem !important; max-width: 1200px; }
-.stTabs [data-baseweb="tab-list"] { gap: 8px; background: transparent; border-bottom: 1px solid #2A2A2A; padding-bottom: 4px; }
-.stTabs [data-baseweb="tab"] { background: transparent !important; color: #888 !important; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border: none !important; padding: 8px 20px; border-radius: 20px !important; }
-.stTabs [aria-selected="true"] { background: #FFFFFF !important; color: #0D0D0D !important; }
-.stFormSubmitButton > button, .stButton > button { background: #1DB954 !important; color: #000000 !important; font-weight: 700 !important; font-size: 14px !important; border: none !important; border-radius: 30px !important; padding: 12px 32px !important; letter-spacing: 0.04em; text-transform: uppercase; }
-.stFormSubmitButton > button:hover, .stButton > button:hover { background: #1ed760 !important; }
-.stTextArea textarea { background: #1A1A1A !important; color: #FFFFFF !important; border: 1px solid #333 !important; border-radius: 12px !important; font-size: 15px !important; padding: 16px !important; }
-.stTextArea textarea:focus { border-color: #1DB954 !important; }
-[data-testid="metric-container"] { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 16px; padding: 20px !important; }
-[data-testid="metric-container"] label { color: #888 !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.08em; }
-[data-testid="metric-container"] [data-testid="stMetricValue"] { color: #FFFFFF !important; font-size: 28px !important; font-weight: 700 !important; }
-.streamlit-expanderHeader { background: #1A1A1A !important; border: 1px solid #2A2A2A !important; border-radius: 12px !important; color: #FFFFFF !important; font-weight: 700; }
-.streamlit-expanderContent { background: #141414 !important; border: 1px solid #2A2A2A !important; border-top: none !important; border-radius: 0 0 12px 12px !important; }
-hr { border-color: #2A2A2A !important; }
-.stCaption { color: #666 !important; font-size: 12px !important; }
-.stSpinner > div { border-top-color: #1DB954 !important; }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0D0D0D; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-.pill-hb { display: inline-block; background: #FF6B35; color: #FFFFFF; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin: 3px; }
-.pill-cna { display: inline-block; background: #4BC8E8; color: #000000; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin: 3px; }
-.stat-card { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 16px; padding: 24px; text-align: center; }
-.stat-num { font-size: 38px; font-weight: 900; color: #1DB954; line-height: 1; margin-bottom: 8px; }
-.stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.1em; }
-.podcast-card { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 20px; padding: 28px; }
-.podcast-card-hb { border-top: 4px solid #FF6B35; }
-.podcast-card-cna { border-top: 4px solid #4BC8E8; }
-.result-header { background: #111; border: 1px solid #1DB954; border-radius: 20px; padding: 28px; margin: 16px 0; }
-.confidence-num { font-size: 52px; font-weight: 900; color: #1DB954; line-height: 1; }
-.confidence-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
-.why-box { background: #0A150A; border-left: 3px solid #1DB954; border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 14px; line-height: 1.7; color: #CCCCCC; }
-.section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
-.example-phrase { background: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #CCCCCC; margin-bottom: 6px; line-height: 1.5; }
+
+/* === BASE — 150% zoom equivalent via larger base font === */
+html, body, [class*="css"] {{
+    background-color: {BG} !important;
+    color: {TEXT} !important;
+    font-family: 'Inter', 'Helvetica Neue', sans-serif;
+    font-size: 18px !important;          /* ~150% of typical 12-13px base */
+}}
+
+#MainMenu, footer, header {{ visibility: hidden; }}
+.block-container {{ padding: 2rem 3rem !important; max-width: 1300px; }}
+
+/* Mode toggle button — small, discrete */
+div[data-testid="stButton"] button {{
+    background: transparent !important;
+    border: 1px solid {BORDER} !important;
+    color: {TEXT4} !important;
+    font-size: 18px !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    min-width: unset !important;
+    line-height: 1.2 !important;
+}}
+div[data-testid="stButton"] button:hover {{
+    border-color: #1DB954 !important;
+    color: #1DB954 !important;
+}}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 8px; background: transparent;
+    border-bottom: 1px solid {BORDER}; padding-bottom: 4px;
+}}
+.stTabs [data-baseweb="tab"] {{
+    background: transparent !important;
+    color: {TEXT4} !important;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    border: none !important; padding: 8px 22px;
+    border-radius: 20px !important;
+}}
+.stTabs [aria-selected="true"] {{
+    background: {TAB_SEL_BG} !important;
+    color: {TAB_SEL_FG} !important;
+}}
+
+/* Primary submit button */
+.stFormSubmitButton > button {{
+    background: #1DB954 !important; color: #000000 !important;
+    font-weight: 700 !important; font-size: 16px !important;
+    border: none !important; border-radius: 30px !important;
+    padding: 14px 36px !important; letter-spacing: 0.04em;
+    text-transform: uppercase;
+}}
+.stFormSubmitButton > button:hover {{ background: #1ed760 !important; }}
+
+/* Text area */
+.stTextArea textarea {{
+    background: {INPUT_BG} !important; color: {INPUT_FG} !important;
+    border: 1px solid {INPUT_BORD} !important; border-radius: 12px !important;
+    font-size: 17px !important; padding: 18px !important;
+}}
+.stTextArea textarea:focus {{ border-color: #1DB954 !important; }}
+
+/* Metric cards */
+[data-testid="metric-container"] {{
+    background: {BG2}; border: 1px solid {BORDER};
+    border-radius: 16px; padding: 20px !important;
+}}
+[data-testid="metric-container"] label {{ color: {TEXT4} !important; font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.08em; }}
+[data-testid="metric-container"] [data-testid="stMetricValue"] {{ color: {TEXT} !important; font-size: 30px !important; font-weight: 700 !important; }}
+
+/* Expanders */
+.streamlit-expanderHeader {{
+    background: {BG2} !important; border: 1px solid {BORDER} !important;
+    border-radius: 12px !important; color: {TEXT} !important; font-weight: 700;
+    font-size: 16px !important;
+}}
+.streamlit-expanderContent {{
+    background: {BG3} !important; border: 1px solid {BORDER} !important;
+    border-top: none !important; border-radius: 0 0 12px 12px !important;
+}}
+
+hr {{ border-color: {BORDER} !important; }}
+.stCaption {{ color: {TEXT4} !important; font-size: 14px !important; }}
+.stSpinner > div {{ border-top-color: #1DB954 !important; }}
+
+::-webkit-scrollbar {{ width: 6px; }}
+::-webkit-scrollbar-track {{ background: {BG}; }}
+::-webkit-scrollbar-thumb {{ background: {SCROLLBAR}; border-radius: 3px; }}
+
+/* Dataframe */
+[data-testid="stDataFrame"] {{ font-size: 15px !important; }}
+
+/* Custom component classes */
+.pill-hb  {{ display:inline-block; background:{HB_COLOR};  color:#000000; font-size:15px; font-weight:700; padding:7px 16px; border-radius:20px; margin:3px; }}
+.pill-cna {{ display:inline-block; background:{CNA_COLOR}; color:#FFFFFF; font-size:15px; font-weight:700; padding:7px 16px; border-radius:20px; margin:3px; }}
+
+.stat-card  {{ background:{BG2}; border:1px solid {BORDER}; border-radius:16px; padding:26px; text-align:center; }}
+.stat-num   {{ font-size:42px; font-weight:900; color:#1DB954; line-height:1; margin-bottom:8px; }}
+.stat-label {{ font-size:13px; color:{TEXT4}; text-transform:uppercase; letter-spacing:0.1em; }}
+
+.podcast-card     {{ background:{BG2}; border:1px solid {BORDER}; border-radius:20px; padding:30px; }}
+.podcast-card-hb  {{ border-top:4px solid {HB_COLOR}; }}
+.podcast-card-cna {{ border-top:4px solid {CNA_COLOR}; }}
+
+.result-header   {{ background:{RESULT_BG}; border:1px solid #1DB954; border-radius:20px; padding:30px; margin:16px 0; }}
+.confidence-num  {{ font-size:56px; font-weight:900; color:#1DB954; line-height:1; }}
+.confidence-label{{ font-size:13px; color:{TEXT4}; text-transform:uppercase; letter-spacing:0.1em; margin-top:4px; }}
+
+.why-box      {{ background:{WHY_BG}; border-left:3px solid #1DB954; border-radius:0 12px 12px 0; padding:18px 22px; margin:16px 0; font-size:16px; line-height:1.7; color:{TEXT3}; }}
+.section-label{{ font-size:13px; font-weight:700; color:{TEXT4}; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px; }}
+.example-phrase{{ background:{BG2}; border:1px solid {BORDER}; border-radius:10px; padding:12px 16px; font-size:15px; color:{TEXT3}; margin-bottom:7px; line-height:1.5; }}
 </style>
 """, unsafe_allow_html=True)
 
+# ── MODEL + DATA ──────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
     with open("outputs/models/tfidf_vectorizer.pkl", "rb") as f:
@@ -133,7 +278,7 @@ PODCAST_INFO = {
         "style": "Psychology · Behaviour · Human Experience",
         "description": "Hidden Brain explores the unconscious patterns that drive human behaviour. Hosted by science journalist Shankar Vedantam, each episode draws on psychology, neuroscience, and social science to explain why we think and act the way we do.",
         "spotify_show_id": "20Gf4IAauFrfj7RBkjcWxh",
-        "color": "#FF6B35",
+        "color": HB_COLOR,
         "pill_class": "pill-hb",
         "card_class": "podcast-card-hb",
         "label": "The Inside View",
@@ -146,7 +291,7 @@ PODCAST_INFO = {
         "style": "Policy · Society · Singapore & Asia",
         "description": "CNA Deep Dive unpacks Singapore's most pressing social, economic, and political issues. Hosted by Steven Chia and Tiffany Ang, each episode brings in expert guests to explain the context behind the headlines.",
         "spotify_show_id": "2hcojizvVOLz8dTRblRuSC",
-        "color": "#4BC8E8",
+        "color": CNA_COLOR,
         "pill_class": "pill-cna",
         "card_class": "podcast-card-cna",
         "label": "The Outside View",
@@ -189,27 +334,27 @@ def recommend(user_input, n=2):
     top_episodes = matched_raw.loc[top_idx]
     return podcast_name, confidence, theme_str, top_keywords, top_episodes, matched_clean, top_idx
 
-# HEADER
-st.markdown("""
+# ── HEADER ────────────────────────────────────────────────────────────────────
+st.markdown(f"""
 <div style="padding: 2rem 0 1rem;">
-  <div style="font-size: 11px; font-weight: 700; color: #1DB954; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Social-Issues Podcast Recommender</div>
-  <div style="font-size: 48px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 16px;">Better Questions</div>
-  <div style="font-size: 15px; color: #AAAAAA; max-width: 620px; line-height: 1.7;">Free podcasts are a vital stepping stone for self-discovery and healing. Type what's on your mind — we'll find the expert conversation that meets you there.</div>
+  <div style="font-size: 13px; font-weight: 700; color: #1DB954; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;">Social-Issues Podcast Recommender</div>
+  <div style="font-size: 54px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 16px; color:{TEXT}">Better Questions</div>
+  <div style="font-size: 17px; color: {TEXT2}; max-width: 640px; line-height: 1.7;">Free podcasts are a vital stepping stone for self-discovery and healing. Type what's on your mind — we'll find the expert conversation that meets you there.</div>
 </div>
-<hr style="border-color: #2A2A2A; margin: 0 0 24px;">
+<hr style="border-color: {BORDER}; margin: 0 0 24px;">
 """, unsafe_allow_html=True)
 
 tab1, tab2, tab3 = st.tabs(["Find My Podcast", "About the Podcasts", "Data Insights"])
 
-# TAB 1
+# ── TAB 1: FIND MY PODCAST ────────────────────────────────────────────────────
 with tab1:
     st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-label">What are you curious about?</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:20px">Describe a topic, a feeling, or a question. We match you to the podcast whose vocabulary mirrors yours — and show exactly which words drove that choice.</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:16px;color:{TEXT2};margin-bottom:20px">Describe a topic, a feeling, or a question. We match you to the podcast whose vocabulary mirrors yours — and show exactly which words drove that choice.</div>', unsafe_allow_html=True)
     st.caption("💡 Mac: ⌘ + Enter  |  Windows: Ctrl + Enter")
 
     with st.form(key="search_form", clear_on_submit=False):
-        user_input = st.text_area("", placeholder='e.g. "why do people make irrational decisions"  or  "Singapore housing policy"', height=110, label_visibility="collapsed")
+        user_input = st.text_area("", placeholder='e.g. "why do people make irrational decisions"  or  "Singapore housing policy"', height=120, label_visibility="collapsed")
         submitted  = st.form_submit_button("Find My Podcast →", type="primary")
 
     if submitted:
@@ -221,9 +366,9 @@ with tab1:
             <div class="result-header">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px">
                 <div>
-                  <div style="font-size:11px;font-weight:700;color:{info['color']};text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">{info['label']}</div>
-                  <div style="font-size:32px;font-weight:900;letter-spacing:-0.02em;margin-bottom:4px">{podcast_name}</div>
-                  <div style="font-size:13px;color:#888">{info['style']} · {info['host']}</div>
+                  <div style="font-size:13px;font-weight:700;color:{info['color']};text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">{info['label']}</div>
+                  <div style="font-size:36px;font-weight:900;letter-spacing:-0.02em;margin-bottom:4px;color:{TEXT}">{podcast_name}</div>
+                  <div style="font-size:15px;color:{TEXT4}">{info['style']} · {info['host']}</div>
                 </div>
                 <div style="text-align:right">
                   <div class="confidence-num">{confidence}%</div>
@@ -233,15 +378,15 @@ with tab1:
             </div>""", unsafe_allow_html=True)
             st.markdown(f'<div class="why-box"><strong style="color:#1DB954">Why this podcast?</strong><br>Your input contained themes related to <strong>{theme_str}</strong> — words strongly associated with <em>{podcast_name}</em>\'s focus on {info["identity"]}.</div>', unsafe_allow_html=True)
             if top_keywords:
-                st.markdown('<div class="section-label" style="margin-top:20px">Key phrases detected</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="section-label" style="margin-top:20px">Key phrases detected</div>', unsafe_allow_html=True)
                 st.markdown(" ".join([f'<span class="{info["pill_class"]}">{kw}</span>' for kw in top_keywords]), unsafe_allow_html=True)
-            st.markdown('<div class="section-label" style="margin-top:24px">Top 2 episodes for you</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="section-label" style="margin-top:24px">Top 2 episodes for you</div>', unsafe_allow_html=True)
             for rank, (idx, row) in enumerate(top_episodes.iterrows(), 1):
                 score      = matched_clean.loc[top_idx[rank-1], "score"]
                 episode_id = get_spotify_episode_id(row["spotify_url"])
                 with st.expander(f"#{rank}  {row['title']}  —  {round(score*100,1)}% match", expanded=True):
-                    st.markdown(f'<div style="color:#888;font-size:13px;margin-bottom:8px">Released {row["release_date"]}</div>', unsafe_allow_html=True)
-                    st.markdown(f'<div style="font-size:14px;color:#CCCCCC;line-height:1.6;margin-bottom:16px">This episode from <em>{podcast_name}</em> closely matches your interest in <strong>{theme_str}</strong>. {info["lens"]}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="color:{TEXT4};font-size:15px;margin-bottom:8px">Released {row["release_date"]}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="font-size:16px;color:{TEXT3};line-height:1.6;margin-bottom:16px">This episode from <em>{podcast_name}</em> closely matches your interest in <strong>{theme_str}</strong>. {info["lens"]}</div>', unsafe_allow_html=True)
                     if episode_id:
                         components.html(f'<iframe style="border-radius:12px" src="https://open.spotify.com/embed/episode/{episode_id}?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>', height=160)
                     else:
@@ -249,22 +394,24 @@ with tab1:
         else:
             st.warning("Please describe what you're interested in.")
 
-    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown(f'<hr style="border-color:{BORDER};margin:32px 0 20px">', unsafe_allow_html=True)
     st.markdown('<div class="section-label">Not sure what to type? Try these</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
+        # Hidden Brain = BLUE pill
         st.markdown('<span class="pill-hb" style="margin-bottom:12px;display:inline-block">Hidden Brain</span>', unsafe_allow_html=True)
         for p in ["the psychology behind why people avoid making difficult decisions","unconscious bias and how it shapes human behavior","the science of happiness and what truly motivates people"]:
             st.markdown(f'<div class="example-phrase">"{p}"</div>', unsafe_allow_html=True)
     with col2:
+        # CNA Deep Dive = ORANGE pill
         st.markdown('<span class="pill-cna" style="margin-bottom:12px;display:inline-block">CNA Deep Dive</span>', unsafe_allow_html=True)
         for p in ["government policy on housing and cost of living in Singapore","mental health support and social services for young people","Singapore's approach to climate change and sustainability"]:
             st.markdown(f'<div class="example-phrase">"{p}"</div>', unsafe_allow_html=True)
 
-# TAB 2
+# ── TAB 2: ABOUT THE PODCASTS ─────────────────────────────────────────────────
 with tab2:
     st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:15px;color:#AAAAAA;margin-bottom:28px">Two podcasts. Both cover social issues. Neither sounds the same.</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:17px;color:{TEXT2};margin-bottom:28px">Two podcasts. Both cover social issues. Neither sounds the same.</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     for col, key in zip([col1, col2], ["Hidden Brain", "CNA Deep Dive"]):
         info = PODCAST_INFO[key]
@@ -272,67 +419,68 @@ with tab2:
         with col:
             st.markdown(f"""
             <div class="podcast-card {info['card_class']}">
-              <div style="font-size:11px;font-weight:700;color:{info['color']};text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">{info['label']}</div>
-              <div style="font-size:26px;font-weight:900;margin-bottom:4px">{key}</div>
-              <div style="font-size:13px;color:#888;margin-bottom:16px">{info['host']}</div>
-              <div style="font-size:14px;color:#CCCCCC;line-height:1.7;margin-bottom:20px">{info['description']}</div>
-              <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Best for</div>
-              {"".join([f'<div style="font-size:13px;color:#CCCCCC;padding:6px 0;border-bottom:1px solid #2A2A2A">→ {t}</div>' for t in info['best_for']])}
+              <div style="font-size:13px;font-weight:700;color:{info['color']};text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">{info['label']}</div>
+              <div style="font-size:28px;font-weight:900;margin-bottom:4px;color:{TEXT}">{key}</div>
+              <div style="font-size:15px;color:{TEXT4};margin-bottom:16px">{info['host']}</div>
+              <div style="font-size:16px;color:{TEXT3};line-height:1.7;margin-bottom:20px">{info['description']}</div>
+              <div style="font-size:13px;font-weight:700;color:{TEXT4};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Best for</div>
+              {"".join([f'<div style="font-size:15px;color:{TEXT3};padding:7px 0;border-bottom:1px solid {BORDER}">→ {t}</div>' for t in info['best_for']])}
             </div>""", unsafe_allow_html=True)
             st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
             components.html(f'<iframe style="border-radius:12px" src="https://open.spotify.com/embed/show/{show_id}?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>', height=160)
-    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown(f'<hr style="border-color:{BORDER};margin:32px 0 20px">', unsafe_allow_html=True)
     st.markdown('<div class="section-label">What separates them?</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
-        st.markdown('<div style="background:#1A1A1A;border-left:3px solid #FF6B35;border-radius:0 12px 12px 0;padding:16px 20px;font-size:14px;color:#CCCCCC;line-height:1.7"><strong style="color:#FF6B35">Hidden Brain</strong> approaches social issues from the <strong>inside out</strong> — starting with individual psychology and working outward. Episodes are topic-focused and timeless.</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background:{BG2};border-left:3px solid {HB_COLOR};border-radius:0 12px 12px 0;padding:18px 22px;font-size:16px;color:{TEXT3};line-height:1.7"><strong style="color:{HB_COLOR}">Hidden Brain</strong> approaches social issues from the <strong>inside out</strong> — starting with individual psychology and working outward. Episodes are topic-focused and timeless.</div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div style="background:#1A1A1A;border-left:3px solid #4BC8E8;border-radius:0 12px 12px 0;padding:16px 20px;font-size:14px;color:#CCCCCC;line-height:1.7"><strong style="color:#4BC8E8">CNA Deep Dive</strong> approaches social issues from the <strong>outside in</strong> — starting with policy, institutions, and current events. Episodes are timely and Singapore-focused.</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background:{BG2};border-left:3px solid {CNA_COLOR};border-radius:0 12px 12px 0;padding:18px 22px;font-size:16px;color:{TEXT3};line-height:1.7"><strong style="color:{CNA_COLOR}">CNA Deep Dive</strong> approaches social issues from the <strong>outside in</strong> — starting with policy, institutions, and current events. Episodes are timely and Singapore-focused.</div>', unsafe_allow_html=True)
 
-# TAB 3
+# ── TAB 3: DATA INSIGHTS ──────────────────────────────────────────────────────
 with tab3:
     st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:15px;color:#AAAAAA;margin-bottom:28px">Trained on 395 real episode descriptions. The model learned the vocabulary of each podcast — without being told what to look for.</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:17px;color:{TEXT2};margin-bottom:28px">Trained on 395 real episode descriptions. The model learned the vocabulary of each podcast — without being told what to look for.</div>', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3, gap="medium")
     with col1:
-        st.markdown('<div class="stat-card"><div class="stat-num">98.73%</div><div class="stat-label">Accuracy</div><div style="font-size:12px;color:#666;margin-top:8px">78 of 79 episodes correct</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-num">98.73%</div><div class="stat-label">Accuracy</div><div style="font-size:14px;color:{TEXT4};margin-top:8px">78 of 79 episodes correct</div></div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div class="stat-card"><div class="stat-num">98.70%</div><div class="stat-label">F1 Score</div><div style="font-size:12px;color:#666;margin-top:8px">Balanced across both podcasts</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-num">98.70%</div><div class="stat-label">F1 Score</div><div style="font-size:14px;color:{TEXT4};margin-top:8px">Balanced across both podcasts</div></div>', unsafe_allow_html=True)
     with col3:
-        st.markdown('<div class="stat-card"><div class="stat-num">1/79</div><div class="stat-label">Wrong predictions</div><div style="font-size:12px;color:#666;margin-top:8px">One understandable edge case</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="stat-card"><div class="stat-num">1/79</div><div class="stat-label">Wrong predictions</div><div style="font-size:14px;color:{TEXT4};margin-top:8px">One understandable edge case</div></div>', unsafe_allow_html=True)
     st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-    st.markdown('<div style="background:#0A150A;border:1px solid #1DB954;border-radius:12px;padding:14px 20px;font-size:14px;color:#1DB954;font-weight:700;margin-bottom:32px">✓ Exceeds the 90% accuracy target set at project start</div>', unsafe_allow_html=True)
+    st.markdown('<div style="background:#0A150A;border:1px solid #1DB954;border-radius:12px;padding:16px 22px;font-size:16px;color:#1DB954;font-weight:700;margin-bottom:32px">✓ Exceeds the 90% accuracy target set at project start</div>', unsafe_allow_html=True)
 
+    # Signature words chart
     st.markdown('<div class="section-label">The signature words of each podcast</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:20px">Discovered by the model — never manually labelled. The longer the bar, the more that word is a signature of that show.</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:16px;color:{TEXT2};margin-bottom:20px">Discovered by the model — never manually labelled. The longer the bar, the more that word is a signature of that show.</div>', unsafe_allow_html=True)
     try:
         features_df = pd.read_csv("outputs/tableau_top_features.csv")
         col1, col2  = st.columns(2, gap="large")
         for col, podcast, color, pill_class, subtitle in [
-            (col1, "Hidden Brain", "#FF6B35", "pill-hb", "The language of internal experience"),
-            (col2, "CNA Deep Dive", "#4BC8E8", "pill-cna", "The language of external structures")
+            (col1, "Hidden Brain",  HB_COLOR,  "pill-hb",  "The language of internal experience"),
+            (col2, "CNA Deep Dive", CNA_COLOR, "pill-cna", "The language of external structures")
         ]:
             with col:
-                st.markdown(f'<span class="{pill_class}">{podcast}</span><div style="font-size:12px;color:#888;margin:8px 0 12px;font-style:italic">{subtitle}</div>', unsafe_allow_html=True)
+                st.markdown(f'<span class="{pill_class}">{podcast}</span><div style="font-size:14px;color:{TEXT4};margin:8px 0 12px;font-style:italic">{subtitle}</div>', unsafe_allow_html=True)
                 df = features_df[features_df["podcast"] == podcast].nlargest(10, "abs_score")
                 fig, ax = plt.subplots(figsize=(5, 4))
-                fig.patch.set_facecolor("#1A1A1A")
-                ax.set_facecolor("#1A1A1A")
+                fig.patch.set_facecolor(PLOT_BG)
+                ax.set_facecolor(PLOT_BG)
                 ax.barh(df["word"], df["abs_score"], color=color, height=0.65)
                 ax.invert_yaxis()
-                ax.set_xlabel("Word Importance", color="#888", fontsize=10)
-                ax.tick_params(colors="#CCCCCC", labelsize=11)
+                ax.set_xlabel("Word Importance", color=PLOT_TICK, fontsize=11)
+                ax.tick_params(colors=PLOT_TICK, labelsize=12)
                 for sp in ax.spines.values(): sp.set_visible(False)
-                ax.grid(axis="x", color="#2A2A2A", linewidth=0.5)
+                ax.grid(axis="x", color=PLOT_GRID, linewidth=0.5)
                 plt.tight_layout()
                 st.pyplot(fig)
                 plt.close()
     except Exception:
         st.info("Feature chart data not found.")
 
-    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    st.markdown(f'<hr style="border-color:{BORDER};margin:32px 0 20px">', unsafe_allow_html=True)
     st.markdown('<div class="section-label">All 9 model approaches tested</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:20px">Every combination exceeded 90% accuracy. TF-IDF + Logistic Regression was chosen for explainability, not just accuracy.</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:16px;color:{TEXT2};margin-bottom:20px">Every combination exceeded 90% accuracy. TF-IDF + Logistic Regression was chosen for explainability, not just accuracy.</div>', unsafe_allow_html=True)
     try:
         model_df = pd.read_csv("outputs/tableau_model_comparison.csv")
         model_df["Accuracy %"] = (model_df["Accuracy"] * 100).round(2)
@@ -343,37 +491,51 @@ with tab3:
     except Exception:
         st.info("Model comparison data not found.")
 
-    st.markdown('<hr style="border-color:#2A2A2A;margin:32px 0 20px">', unsafe_allow_html=True)
+    # ── TABLEAU EMBED ─────────────────────────────────────────────────────────
+    st.markdown(f'<hr style="border-color:{BORDER};margin:32px 0 20px">', unsafe_allow_html=True)
     st.markdown('<div class="section-label">Full interactive dashboard</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:14px;color:#AAAAAA;margin-bottom:16px">Built with Tableau — scroll to explore the full data story.</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="font-size:16px;color:{TEXT2};margin-bottom:8px">Built with Tableau — scroll to explore the full data story.</div>'
+        f'<div style="margin-bottom:16px"><a href="https://public.tableau.com/views/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft" '
+        f'target="_blank" style="color:#1DB954;font-size:15px;font-weight:700;text-decoration:underline;">'
+        f'→ Open my Tableau Public Dashboard</a></div>',
+        unsafe_allow_html=True
+    )
+
     tableau_embed = """
-    <div class='tableauPlaceholder' id='viz1775658569626' style='position: relative'>
-        <noscript><a href='#'><img alt='Social Issues Podcast Recommender' src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png' style='border: none' /></a></noscript>
-        <object class='tableauViz' style='display:none;'>
-            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
-            <param name='embed_code_version' value='3' />
-            <param name='site_root' value='' />
-            <param name='name' value='GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft' />
-            <param name='tabs' value='no' />
-            <param name='toolbar' value='yes' />
-            <param name='static_image' value='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1.png' />
-            <param name='animate_transition' value='yes' />
-            <param name='display_static_image' value='yes' />
-            <param name='display_spinner' value='yes' />
-            <param name='display_overlay' value='yes' />
-            <param name='display_count' value='yes' />
-            <param name='language' value='en-GB' />
-            <param name='filter' value='publish=yes' />
-        </object>
+    <div class='tableauPlaceholder' id='viz1776155299' style='position:relative; width:100%;'>
+      <noscript>
+        <a href='https://public.tableau.com/views/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft'>
+          <img alt='Social Issues Podcast Recommender'
+               src='https://public.tableau.com/static/images/GA/GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft/1_rss.png'
+               style='border:none' />
+        </a>
+      </noscript>
+      <object class='tableauViz' style='display:none;'>
+        <param name='host_url'           value='https%3A%2F%2Fpublic.tableau.com%2F' />
+        <param name='embed_code_version' value='3' />
+        <param name='site_root'          value='' />
+        <param name='name'               value='GADACapstoneSocialIssuesPodcastRecommenderDashboard/FinalDraft' />
+        <param name='tabs'               value='no' />
+        <param name='toolbar'            value='yes' />
+        <param name='animate_transition' value='yes' />
+        <param name='display_static_image' value='yes' />
+        <param name='display_spinner'    value='yes' />
+        <param name='display_overlay'    value='yes' />
+        <param name='display_count'      value='yes' />
+        <param name='language'           value='en-GB' />
+        <param name='filter'             value='publish=yes' />
+      </object>
     </div>
     <script type='text/javascript'>
-        var divElement = document.getElementById('viz1775658569626');
-        var vizElement = divElement.getElementsByTagName('object')[0];
-        if (divElement.offsetWidth > 800) { vizElement.style.width='1200px'; vizElement.style.height='2027px'; }
-        else if (divElement.offsetWidth > 500) { vizElement.style.width='1200px'; vizElement.style.height='2027px'; }
-        else { vizElement.style.width='100%'; vizElement.style.height='2727px'; }
-        var scriptElement = document.createElement('script');
-        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+      (function() {
+        var divElement  = document.getElementById('viz1776155299');
+        var vizElement  = divElement.getElementsByTagName('object')[0];
+        vizElement.style.width  = '100%';
+        vizElement.style.height = '2027px';
+        var scriptElement       = document.createElement('script');
+        scriptElement.src       = 'https://public.tableau.com/javascripts/api/viz_v1.js';
         vizElement.parentNode.insertBefore(scriptElement, vizElement);
+      })();
     </script>"""
     components.html(tableau_embed, height=2150, scrolling=True)
