@@ -20,10 +20,48 @@ except Exception:
     SPOTIFY_CLIENT_ID     = os.getenv("SPOTIFY_CLIENT_ID")
     SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
+st.set_page_config(page_title="Better Questions", page_icon="🎙️", layout="wide")
+
 # Keep the native Streamlit toolbar/settings menu available for theme switching.
 st.set_option("client.toolbarMode", "developer")
 
-st.set_page_config(page_title="Better Questions", page_icon="🎙️", layout="wide")
+# Fallback theme switch in case native menu is unavailable in the host/browser.
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "System"
+
+with st.sidebar:
+    st.markdown("### Appearance")
+    theme_mode = st.radio(
+        "Theme",
+        options=["System", "Light", "Dark"],
+        key="theme_mode",
+        horizontal=True,
+    )
+
+if theme_mode == "Dark":
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #0e1117 !important;
+        color: #fafafa !important;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #141a24 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+elif theme_mode == "Light":
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #ffffff !important;
+        color: #121212 !important;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #f5f7fb !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # ── COLOURS ───────────────────────────────────────────────────────────────────
 # Hidden Brain  = BLUE  (#4BC8E8)
