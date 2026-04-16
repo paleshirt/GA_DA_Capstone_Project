@@ -21,7 +21,7 @@ except Exception:
     SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 # Keep the native Streamlit toolbar/settings menu available for theme switching.
-st.set_option("client.toolbarMode", "viewer")
+st.set_option("client.toolbarMode", "developer")
 
 st.set_page_config(page_title="Better Questions", page_icon="🎙️", layout="wide")
 
@@ -49,6 +49,10 @@ html, body, [class*="css"] {{
 footer {{ visibility: hidden; }}
 
 /* Force native toolbar/menu visibility so users can switch Light/Dark/System */
+[data-testid="stHeader"] {{
+    visibility: visible !important;
+    opacity: 1 !important;
+}}
 [data-testid="stToolbar"] {{
     visibility: visible !important;
     opacity: 1 !important;
