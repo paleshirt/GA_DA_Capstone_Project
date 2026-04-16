@@ -20,6 +20,9 @@ except Exception:
     SPOTIFY_CLIENT_ID     = os.getenv("SPOTIFY_CLIENT_ID")
     SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
+# Keep the native Streamlit toolbar/settings menu available for theme switching.
+st.set_option("client.toolbarMode", "viewer")
+
 st.set_page_config(page_title="Better Questions", page_icon="🎙️", layout="wide")
 
 # ── COLOURS ───────────────────────────────────────────────────────────────────
@@ -44,6 +47,13 @@ html, body, [class*="css"] {{
 
 /* Hide only the footer watermark — keep MainMenu visible for theme toggle */
 footer {{ visibility: hidden; }}
+
+/* Force native toolbar/menu visibility so users can switch Light/Dark/System */
+[data-testid="stToolbar"] {{
+    visibility: visible !important;
+    opacity: 1 !important;
+}}
+#MainMenu {{ visibility: visible !important; }}
 
 .block-container {{ padding: 2rem 3rem !important; max-width: 1300px; }}
 
