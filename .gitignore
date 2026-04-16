@@ -1,0 +1,17 @@
+# Environment variables
+.env
+
+# Mac system files
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data files (optional - remove if you want to push data)
+data_raw/
+data_clean/
+
+# Streamlit Spotify account
+.streamlit/secrets.toml

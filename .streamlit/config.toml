@@ -1,7 +1,6 @@
+[client]
+toolbarMode = "auto"
+
 [theme]
-base = "dark"
 primaryColor = "#1DB954"
-backgroundColor = "#0D0D0D"
-secondaryBackgroundColor = "#1A1A1A"
-textColor = "#FFFFFF"
 font = "sans serif"
