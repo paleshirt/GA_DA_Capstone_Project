@@ -73,7 +73,7 @@ CNA_COLOR = "#FF6B35"
 # We do NOT hard-code background colours — Streamlit's native theme engine
 # (config.toml + the ⋮ Settings menu) handles light/dark switching smoothly.
 # The hamburger/settings menu is kept visible so the user can toggle themes.
-st.markdown(f"""
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
@@ -166,7 +166,7 @@ hr {{ margin: 28px 0 !important; }}
     text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px;
 }}
 </style>
-""", unsafe_allow_html=True)
+""".format(HB_COLOR=HB_COLOR, CNA_COLOR=CNA_COLOR), unsafe_allow_html=True)
 
 # ── MODEL + DATA ──────────────────────────────────────────────────────────────
 @st.cache_resource
