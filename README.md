@@ -159,7 +159,7 @@ streamlit run app.py
 Then open `http://localhost:8501` in your browser.
 
 ### Public Demo
-[Link to be added after Streamlit Cloud deployment]
+`https://betterquestions.streamlit.app/`
 
 ---
 
@@ -199,3 +199,15 @@ requirements.txt        → Python dependencies
 1. Clone the repo
 2. Install dependencies: `pip install -r requirements.txt`
 3. Add your Spotify credentials to a `.env` file:
+  SPOTIFY_CLIENT_ID=your_id_here
+  SPOTIFY_CLIENT_SECRET=your_secret_here
+4. Run scripts in order: `01_data_extraction.py` through `12_export_for_tableau.py`
+5. Or run the app directly: `streamlit run app.py`
+
+---
+
+## Notes
+- Dataset is balanced at 200 episodes per podcast (400 total) to avoid class imbalance
+- The main goal of the MVP is to prove the concept with a strong classifier before scaling up
+- All cleaning decisions are documented in `docs/cleaning_decisions.md`
+- The model was intentionally scoped to 2 podcasts first to maximise performance
